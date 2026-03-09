@@ -3,6 +3,31 @@ name = "tongbal-oauth"
 version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
+description = "Chzzk OAuth 2.0 client"
+documentation = "https://docs.rs/tongbal-oauth"
 license.workspace = true
+keywords = ["api", "chzzk", "oauth"]
+categories = ["api-bindings", "authentication", "web-programming"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
+asknothingx2-util = { workspace = true, features = ["api", "oauth"] }
+chrono.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+anyhow = "1.0.102"
+asknothingx2-util = { workspace = true, features = [
+  "api",
+  "oauth",
+  "oauth-server"
+] }
+dotenvy = "0.15.7"
+tokio = { version = "1.50.0", features = ["full"] }

@@ -1,14 +1,100 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! OAuth 2.0 authorization client for the Chzzk API.
+//!
+//! Handles the authorization code flow.
+//!
+//! ## Quick Start
+//!
+//! ```no_run
+//! use std::str::FromStr;
+//! use tongbal_oauth::{ClientId, ClientSecret, RedirectUrl, TongbalOauth};
+//!
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let oauth = TongbalOauth::new(
+//!         ClientId::from("client_id"),
+//!         ClientSecret::from("client_secret"),
+//!         RedirectUrl::from_str("http://localhost:3000/auth/callback")?,
+//!     );
+//!
+//!     let auth_url = oauth.auth_url();
+//!     println!("Visit: {}", auth_url);
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ## Handling OAuth Callbacks
+//!
+//! ```no_run
+//! use tongbal_oauth::{AuthCallback, Error, TongbalOauth};
+//!
+//! async fn handle_callback(
+//!     oauth: &TongbalOauth,
+//!     callback: AuthCallback,
+//! ) -> Result<(), Error> {
+//!     let token = oauth
+//!         .exchange_code(callback.code, callback.state)
+//!         .await?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ## Token Management
+//!
+//! ### Refresh
+//!
+//! ```rust
+//! # use tongbal_oauth::{Error, RefreshToken, TongbalOauth};
+//! # async fn run(oauth: TongbalOauth, refresh_token: RefreshToken) -> Result<(), Error> {
+//! let new_token = oauth.refresh_token(refresh_token).await?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ### Revocation
+//!
+//! Both [`AccessToken`] and [`RefreshToken`] can be revoked.
+//!
+//! ```rust
+//! # use tongbal_oauth::{AccessToken, Error, RefreshToken, TongbalOauth};
+//! # async fn run(oauth: TongbalOauth, access_token: AccessToken, refresh_token: RefreshToken) -> Result<(), Error> {
+//! oauth.revoke_token(access_token).await?;
+//! oauth.revoke_token(refresh_token).await?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ## HTTP Client
+//!
+//! A suitable HTTP client for authorization is used by default.
+//! If customization is needed, see [`client::setup`].
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod client;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+mod error;
+mod oauth;
+mod request;
+mod response;
+mod tokens;
+mod types;
+
+pub use error::Error;
+pub use oauth::TongbalOauth;
+pub use response::APIResponse;
+pub use tokens::Token;
+pub use types::AuthCallback;
+
+pub use asknothingx2_util::oauth::{
+    AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, RefreshToken,
+    RevocationUrl, TokenUrl,
+};
+
+pub mod csrf {
+    pub use asknothingx2_util::oauth::signed_token::{
+        TokenConfig as CsrfConfig, TokenError, current_timestamp, extract_datetime,
+        extract_timestamp, generate, generate_at_time, generate_secret_key, is_expired, token_age,
+        verify, verify_at_time, verify_with_config,
+    };
 }
