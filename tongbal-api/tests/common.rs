@@ -299,6 +299,42 @@ impl UserHttpMock {
     }
 }
 
+impl UserHttpMock {
+    pub async fn add_restraction(&self) {
+        user_client_mock("post", "/restrict-channels")
+            .and(body_json(json!({
+                "targetChannelId": "909501f048b44cf0d5c1d28XXXXXXXX"
+            })))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn remove_restriction(&self) {
+        user_client_mock("delete", "/restrict-channels")
+            .and(body_json(json!({
+                "targetChannelId": "909501f048b44cf0d5c1d28XXXXXXXX"
+            })))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn get_restrictions(&self) {
+        user_client_mock("get", "/restrict-channels")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": [],
+                    "page": { "next": null}
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+}
+
 fn app_client_mock(http_method: &str, endpoint: &str) -> MockBuilder {
     basic_mock(http_method, endpoint)
         .and(header("client-id", "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX"))

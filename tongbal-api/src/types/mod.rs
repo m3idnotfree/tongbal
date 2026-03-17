@@ -12,9 +12,11 @@ pub(crate) mod constants {
     pub const FOLLOWERS: &str = "followers";
     pub const LIVES: &str = "lives";
     pub const ME: &str = "me";
+    pub const NEXT: &str = "next";
     pub const NOTICE: &str = "notice";
     pub const PAGE: &str = "page";
     pub const QUERY: &str = "query";
+    pub const RESTRICT_CHANNELS: &str = "restrict-channels";
     pub const SEARCH: &str = "search";
     pub const SEND: &str = "send";
     pub const SETTING: &str = "setting";
