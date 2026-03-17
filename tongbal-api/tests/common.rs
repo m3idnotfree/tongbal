@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use serde_json::json;
-use tongbal_api::{AppClient, ClientId, ClientSecret};
+use tongbal_api::{AccessToken, AppClient, ClientId, ClientSecret};
 use url::Url;
 use wiremock::{
     Mock, MockBuilder, MockServer, ResponseTemplate,
@@ -37,7 +37,7 @@ impl AppHttpMock {
 
 impl AppHttpMock {
     pub async fn search_category(&self) {
-        api_mock("get", "/categories/search")
+        app_client_mock("get", "/categories/search")
        .and(query_param("query", "all"))
         .and(query_param("size", "5"))
         .respond_with(ResponseTemplate::new(200).set_body_json(json!({
@@ -83,13 +83,65 @@ impl AppHttpMock {
     }
 }
 
-fn api_mock(http_method: &str, endpoint: &str) -> MockBuilder {
+#[derive(Debug)]
+pub struct UserHttpMock {
+    user_client: tongbal_api::Client,
+    server: MockServer,
+}
+
+impl UserHttpMock {
+    pub async fn new() -> Self {
+        let server = MockServer::start().await;
+        let mut url_parsed = Url::parse(&server.uri()).unwrap();
+        url_parsed.set_path("/open/v1");
+
+        let user_client = tongbal_api::Client::with_client_builder(
+            AccessToken::from("FFok65zQFQVcFvH2eJ7SS7SBFlTXt0EZ10L5XXXXXXXX"),
+            reqwest::ClientBuilder::new(),
+        )
+        .with_url(url_parsed);
+
+        Self {
+            user_client,
+            server,
+        }
+    }
+
+    pub fn client(&self) -> &tongbal_api::Client {
+        &self.user_client
+    }
+}
+
+impl UserHttpMock {
+    pub async fn get_me(&self) {
+        user_client_mock("get", "/users/me")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "channelId": "909501f048b44cf0d5c1d28XXXXXXXX",
+                    "channelName": "치지직유저 3121"
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+}
+
+fn app_client_mock(http_method: &str, endpoint: &str) -> MockBuilder {
     basic_mock(http_method, endpoint)
         .and(header("client-id", "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX"))
         .and(header(
             "client-secret",
             "VeIMuc9XGle7PSxIVYNwPpI2OEk_9gXoW_XXXXXXXXX",
         ))
+}
+
+fn user_client_mock(http_method: &str, endpoint: &str) -> MockBuilder {
+    basic_mock(http_method, endpoint).and(header(
+        "authorization",
+        "Bearer FFok65zQFQVcFvH2eJ7SS7SBFlTXt0EZ10L5XXXXXXXX",
+    ))
 }
 
 fn basic_mock(http_method: &str, endpoint: &str) -> MockBuilder {

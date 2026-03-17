@@ -1,10 +1,16 @@
+mod ids;
+
+pub use ids::ChannelId;
+
 use serde::{Deserialize, Serialize};
 
 pub(crate) mod constants {
     pub const CATEGORIES: &str = "categories";
-    pub const SEARCH: &str = "search";
+    pub const ME: &str = "me";
     pub const QUERY: &str = "query";
+    pub const SEARCH: &str = "search";
     pub const SIZE: &str = "size";
+    pub const USERS: &str = "users";
 }
 
 #[derive(Debug, Deserialize, Serialize)]

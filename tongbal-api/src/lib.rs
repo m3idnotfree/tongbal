@@ -3,6 +3,7 @@
 
 pub mod category;
 pub mod types;
+pub mod user;
 
 mod client;
 mod error;
