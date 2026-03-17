@@ -5,7 +5,7 @@ use tongbal_api::{AccessToken, AppClient, ClientId, ClientSecret};
 use url::Url;
 use wiremock::{
     Mock, MockBuilder, MockServer, ResponseTemplate,
-    matchers::{header, method, path, query_param},
+    matchers::{body_json, header, method, path, query_param},
 };
 
 #[derive(Debug)]
@@ -189,6 +189,54 @@ impl UserHttpMock {
 
     pub async fn set_stream_settings(&self) {
         user_client_mock("patch", "/lives/setting")
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await
+    }
+}
+
+impl UserHttpMock {
+    pub async fn send_message(&self) {
+        user_client_mock("post", "/chats/send")
+            .and(body_json(json!({
+                "message": "hi"
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                  "messageId": ""
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn set_chat_notice(&self) {
+        user_client_mock("post", "/chats/notice")
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn get_chat_settings(&self) {
+        user_client_mock("get", "/chats/settings")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                  "chatAvailableCondition": "NONE",
+                  "chatAvailableGroup": "ALL",
+                  "minFollowerMinute": 0,
+                  "allowSubscriberInFollowerMode": true
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn set_chat_settings(&self) {
+        user_client_mock("put", "/chats/settings")
             .respond_with(ResponseTemplate::new(204))
             .mount(&self.server)
             .await
