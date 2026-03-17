@@ -83,6 +83,38 @@ impl AppHttpMock {
     }
 }
 
+impl AppHttpMock {
+    pub async fn get_live_list(&self) {
+        app_client_mock("get", "/lives")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                  "data": [
+                    {
+                      "liveId": 0,
+                      "liveTitle": "",
+                      "liveThumbnailImageUrl": "",
+                      "concurrentUserCount": 0,
+                      "openDate": "",
+                      "adult": false,
+                      "tags": [""],
+                      "categoryType": "GAME",
+                      "liveCategory": "",
+                      "liveCategoryValue": "",
+                      "channelId": "",
+                      "channelName": "",
+                      "channelImageUrl": ""
+                    }
+                  ],
+                  "page": { "next": "" }
+                }
+            })))
+            .mount(&self.server)
+            .await;
+    }
+}
+
 #[derive(Debug)]
 pub struct UserHttpMock {
     user_client: tongbal_api::Client,
@@ -123,6 +155,41 @@ impl UserHttpMock {
                     "channelName": "치지직유저 3121"
                 }
             })))
+            .mount(&self.server)
+            .await
+    }
+}
+
+impl UserHttpMock {
+    pub async fn get_stream_key(&self) {
+        user_client_mock("get", "/streams/key")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": { "streamKey": "" }
+            })))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn get_stream_settings(&self) {
+        user_client_mock("get", "/lives/setting")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                  "defaultLiveTitle": "",
+                  "category": null,
+                  "tags": []
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn set_stream_settings(&self) {
+        user_client_mock("patch", "/lives/setting")
+            .respond_with(ResponseTemplate::new(204))
             .mount(&self.server)
             .await
     }

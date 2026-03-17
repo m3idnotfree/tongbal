@@ -2,6 +2,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 pub mod category;
+pub mod live;
 pub mod types;
 pub mod user;
 

@@ -6,10 +6,13 @@ use serde::{Deserialize, Serialize};
 
 pub(crate) mod constants {
     pub const CATEGORIES: &str = "categories";
+    pub const LIVES: &str = "lives";
     pub const ME: &str = "me";
     pub const QUERY: &str = "query";
     pub const SEARCH: &str = "search";
+    pub const SETTING: &str = "setting";
     pub const SIZE: &str = "size";
+    pub const STREAMS: &str = "streams";
     pub const USERS: &str = "users";
 }
 
@@ -28,4 +31,9 @@ pub enum CategoryType {
     Game,
     Sports,
     Etc,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Page {
+    pub next: Option<String>,
 }
