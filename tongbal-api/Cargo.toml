@@ -13,6 +13,10 @@ categories = ["api-bindings", "web-programming"]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
+[[test]]
+name = "category"
+path = "tests/category.rs"
+
 [dependencies]
 asknothingx2-util = { workspace = true, features = ["api", "oauth"] }
 reqwest.workspace = true
@@ -20,3 +24,7 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 url.workspace = true
+
+[dev-dependencies]
+tokio = "1.50.0"
+wiremock = "0.6.5"

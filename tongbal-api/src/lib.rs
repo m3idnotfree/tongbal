@@ -1,6 +1,9 @@
 //! See <https://chzzk.gitbook.io/chzzk>
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+pub mod category;
+pub mod types;
+
 mod client;
 mod error;
 mod response;
