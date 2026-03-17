@@ -14,6 +14,10 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [[test]]
+name = "channel"
+path = "tests/channel.rs"
+
+[[test]]
 name = "chat"
 path = "tests/chat.rs"
 

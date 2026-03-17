@@ -6,18 +6,24 @@ use serde::{Deserialize, Serialize};
 
 pub(crate) mod constants {
     pub const CATEGORIES: &str = "categories";
+    pub const CHANNELIDS: &str = "channelIds";
+    pub const CHANNELS: &str = "channels";
+    pub const CHATS: &str = "chats";
+    pub const FOLLOWERS: &str = "followers";
     pub const LIVES: &str = "lives";
     pub const ME: &str = "me";
     pub const NOTICE: &str = "notice";
+    pub const PAGE: &str = "page";
     pub const QUERY: &str = "query";
     pub const SEARCH: &str = "search";
+    pub const SEND: &str = "send";
     pub const SETTING: &str = "setting";
     pub const SETTINGS: &str = "settings";
     pub const SIZE: &str = "size";
+    pub const SORT: &str = "sort";
     pub const STREAMS: &str = "streams";
+    pub const SUBSCRIBERS: &str = "subscribers";
     pub const USERS: &str = "users";
-    pub const CHATS: &str = "chats";
-    pub const SEND: &str = "send";
 }
 
 #[derive(Debug, Deserialize, Serialize)]

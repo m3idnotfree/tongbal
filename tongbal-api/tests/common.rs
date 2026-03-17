@@ -115,6 +115,21 @@ impl AppHttpMock {
     }
 }
 
+impl AppHttpMock {
+    pub async fn get_channels(&self) {
+        app_client_mock("get", "/channels")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": []
+                }
+            })))
+            .mount(&self.server)
+            .await;
+    }
+}
+
 #[derive(Debug)]
 pub struct UserHttpMock {
     user_client: tongbal_api::Client,
@@ -238,6 +253,47 @@ impl UserHttpMock {
     pub async fn set_chat_settings(&self) {
         user_client_mock("put", "/chats/settings")
             .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await
+    }
+}
+
+impl UserHttpMock {
+    pub async fn get_channel_moderators(&self) {
+        user_client_mock("get", "/channels/streaming-roles")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": []
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn get_channel_followers(&self) {
+        user_client_mock("get", "/channels/followers")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": []
+                }
+            })))
+            .mount(&self.server)
+            .await
+    }
+
+    pub async fn get_channel_subscribers(&self) {
+        user_client_mock("get", "/channels/subscribers")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": []
+                }
+            })))
             .mount(&self.server)
             .await
     }
