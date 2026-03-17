@@ -1,16 +1,12 @@
+//! See <https://chzzk.gitbook.io/chzzk>
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+mod client;
+mod error;
+mod response;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub use client::{AppClient, BaseClient, Client};
+pub use error::Error;
+pub use response::APIResponse;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use asknothingx2_util::oauth::{AccessToken, ClientId, ClientSecret};
