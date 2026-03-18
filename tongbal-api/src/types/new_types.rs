@@ -89,3 +89,5 @@ macro_rules! new_type {
 
 new_type!(ChannelId);
 new_type!(MessageId);
+
+new_type!(SessionKey);

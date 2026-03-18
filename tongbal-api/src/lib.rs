@@ -6,6 +6,7 @@ pub mod channel;
 pub mod chat;
 pub mod live;
 pub mod restriction;
+pub mod session;
 pub mod types;
 pub mod user;
 

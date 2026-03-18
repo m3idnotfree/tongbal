@@ -130,6 +130,112 @@ impl AppHttpMock {
     }
 }
 
+impl AppHttpMock {
+    pub async fn create_session(&self) {
+        app_client_mock("get", "/sessions/auth/client")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "url": "https://ssio08.nchat.naver.com:443?auth=TOKEN"
+                }
+            })))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn get_sessions(&self) {
+        app_client_mock("get", "/sessions/client")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": [
+                        {
+                            "sessionKey": "",
+                            "connectedDate": "",
+                            "disconnectedDate": "",
+                            "subscribedEvents": [
+                                {
+                                    "eventType": "CHAT",
+                                    "channelId": ""
+                                }
+                            ]
+                        }
+                    ]
+                }
+            })))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn subscribe_chat(&self) {
+        app_client_mock("post", "/sessions/events/subscribe/chat")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn subscribe_donation(&self) {
+        app_client_mock("post", "/sessions/events/subscribe/donation")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn subscribe_subscription(&self) {
+        app_client_mock("post", "/sessions/events/subscribe/subscription")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn unsubscribe_chat(&self) {
+        app_client_mock("post", "/sessions/events/unsubscribe/chat")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn unsubscribe_donation(&self) {
+        app_client_mock("post", "/sessions/events/unsubscribe/donation")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn unsubscribe_subscription(&self) {
+        app_client_mock("post", "/sessions/events/unsubscribe/subscription")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+}
+
 #[derive(Debug)]
 pub struct UserHttpMock {
     user_client: tongbal_api::Client,
@@ -332,6 +438,112 @@ impl UserHttpMock {
             })))
             .mount(&self.server)
             .await
+    }
+}
+
+impl UserHttpMock {
+    pub async fn create_session(&self) {
+        user_client_mock("get", "/sessions/auth")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "url": "https://ssio08.nchat.naver.com:443?auth=TOKEN"
+                }
+            })))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn get_sessions(&self) {
+        user_client_mock("get", "/sessions")
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "code": 200,
+                "message": null,
+                "content": {
+                    "data": [
+                        {
+                            "sessionKey": "",
+                            "connectedDate": "",
+                            "disconnectedDate": "",
+                            "subscribedEvents": [
+                                {
+                                    "eventType": "CHAT",
+                                    "channelId": ""
+                                }
+                            ]
+                        }
+                    ]
+                }
+            })))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn subscribe_chat(&self) {
+        user_client_mock("post", "/sessions/events/subscribe/chat")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn subscribe_donation(&self) {
+        user_client_mock("post", "/sessions/events/subscribe/donation")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn subscribe_subscription(&self) {
+        user_client_mock("post", "/sessions/events/subscribe/subscription")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn unsubscribe_chat(&self) {
+        user_client_mock("post", "/sessions/events/unsubscribe/chat")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn unsubscribe_donation(&self) {
+        user_client_mock("post", "/sessions/events/unsubscribe/donation")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
+    }
+
+    pub async fn unsubscribe_subscription(&self) {
+        user_client_mock("post", "/sessions/events/unsubscribe/subscription")
+            .and(query_param(
+                "sessionKey",
+                "fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX",
+            ))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&self.server)
+            .await;
     }
 }
 
