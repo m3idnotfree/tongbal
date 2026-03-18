@@ -9,7 +9,7 @@ pub use types::{Channel, Follower, Moderator, Sort, Subscriber, Tier, UserRole};
 use std::future::Future;
 
 use crate::{
-    APIResponse, AppClient, BaseClient, Client, Error,
+    APIResponse, AppClient, BaseClient, Error, UserClient,
     types::{
         ChannelId,
         constants::{CHANNELIDS, CHANNELS},
@@ -53,7 +53,7 @@ impl AppChannelAPI for AppClient {
     }
 }
 
-impl UserChannelAPI for Client {
+impl UserChannelAPI for UserClient {
     async fn get_channel_moderators(&self) -> Result<APIResponse<ModeratorResponse>, Error> {
         let mut url = self.base_url();
 

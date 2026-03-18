@@ -11,7 +11,7 @@ use std::future::Future;
 use types::{MessageBody, NoticeBody};
 
 use crate::{
-    APIResponse, BaseClient, Client, Error,
+    APIResponse, BaseClient, Error, UserClient,
     types::constants::{CHATS, SEND, SETTINGS},
 };
 
@@ -34,7 +34,7 @@ pub trait ChatAPI: BaseClient {
     fn set_chat_settings<'a>(&'a self) -> SetChatSettings<'a>;
 }
 
-impl ChatAPI for Client {
+impl ChatAPI for UserClient {
     async fn send_message(&self, message: &str) -> Result<APIResponse<MessageResponse>, Error> {
         let mut url = self.base_url();
         url.path_segments_mut().unwrap().extend([CHATS, SEND]);

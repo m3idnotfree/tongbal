@@ -11,7 +11,7 @@ use std::future::Future;
 use types::RestrictionBody;
 
 use crate::{
-    BaseClient, Client, Error,
+    BaseClient, Error, UserClient,
     types::{ChannelId, constants::RESTRICT_CHANNELS},
 };
 
@@ -30,7 +30,7 @@ pub trait RestrictionAPI: BaseClient {
     fn get_restrictions<'a>(&'a self) -> GetRestriction<'a>;
 }
 
-impl RestrictionAPI for Client {
+impl RestrictionAPI for UserClient {
     async fn add_restraction(&self, target: &ChannelId) -> Result<(), Error> {
         let mut url = self.base_url();
 

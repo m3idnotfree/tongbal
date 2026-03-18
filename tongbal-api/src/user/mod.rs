@@ -5,7 +5,7 @@ pub use types::User;
 use std::future::Future;
 
 use crate::{
-    APIResponse, BaseClient, Client, Error,
+    APIResponse, BaseClient, Error, UserClient,
     types::constants::{ME, USERS},
 };
 
@@ -14,7 +14,7 @@ pub trait UserAPI: BaseClient {
     fn get_me(&self) -> impl Future<Output = Result<APIResponse<User>, Error>> + Send;
 }
 
-impl UserAPI for Client {
+impl UserAPI for UserClient {
     async fn get_me(&self) -> Result<APIResponse<User>, Error> {
         let mut url = self.base_url();
         url.path_segments_mut().unwrap().extend([USERS, ME]);

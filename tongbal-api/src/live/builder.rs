@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::{
-    BaseClient, Client, Error,
+    BaseClient, Error, UserClient,
     types::{
         CategoryType,
         constants::{LIVES, SETTING},
@@ -12,7 +12,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct SetStreamSetting<'a> {
     #[serde(skip)]
-    client: &'a Client,
+    client: &'a UserClient,
     #[serde(skip_serializing_if = "Option::is_none")]
     default_live_title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -24,7 +24,7 @@ pub struct SetStreamSetting<'a> {
 }
 
 impl<'a> SetStreamSetting<'a> {
-    pub(crate) fn new(client: &'a Client) -> Self {
+    pub(crate) fn new(client: &'a UserClient) -> Self {
         Self {
             client,
             default_live_title: None,

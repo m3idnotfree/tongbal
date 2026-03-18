@@ -9,7 +9,7 @@ pub use types::Live;
 use std::future::Future;
 
 use crate::{
-    APIResponse, AppClient, BaseClient, Client, Error,
+    APIResponse, AppClient, BaseClient, Error, UserClient,
     types::constants::{LIVES, SETTING, SIZE, STREAMS},
 };
 
@@ -56,7 +56,7 @@ impl AppLiveAPI for AppClient {
     }
 }
 
-impl UserLiveAPI for Client {
+impl UserLiveAPI for UserClient {
     async fn get_stream_key(&self) -> Result<APIResponse<StreamKey>, Error> {
         let mut url = self.base_url();
         url.path_segments_mut().unwrap().extend([STREAMS, "key"]);

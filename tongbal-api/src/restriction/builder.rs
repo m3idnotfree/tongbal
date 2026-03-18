@@ -1,5 +1,5 @@
 use crate::{
-    APIResponse, BaseClient, Client, Error,
+    APIResponse, BaseClient, Error, UserClient,
     types::constants::{NEXT, RESTRICT_CHANNELS, SIZE},
 };
 
@@ -7,13 +7,13 @@ use super::RestrictionChannelResponse;
 
 #[derive(Debug)]
 pub struct GetRestriction<'a> {
-    client: &'a Client,
+    client: &'a UserClient,
     size: Option<u64>,
     next: Option<String>,
 }
 
 impl<'a> GetRestriction<'a> {
-    pub(crate) fn new(client: &'a Client) -> Self {
+    pub(crate) fn new(client: &'a UserClient) -> Self {
         Self {
             client,
             size: None,

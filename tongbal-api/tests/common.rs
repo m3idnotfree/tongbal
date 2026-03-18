@@ -238,7 +238,7 @@ impl AppHttpMock {
 
 #[derive(Debug)]
 pub struct UserHttpMock {
-    user_client: tongbal_api::Client,
+    user_client: tongbal_api::UserClient,
     server: MockServer,
 }
 
@@ -248,7 +248,7 @@ impl UserHttpMock {
         let mut url_parsed = Url::parse(&server.uri()).unwrap();
         url_parsed.set_path("/open/v1");
 
-        let user_client = tongbal_api::Client::with_client_builder(
+        let user_client = tongbal_api::UserClient::with_client_builder(
             AccessToken::from("FFok65zQFQVcFvH2eJ7SS7SBFlTXt0EZ10L5XXXXXXXX"),
             reqwest::ClientBuilder::new(),
         )
@@ -260,7 +260,7 @@ impl UserHttpMock {
         }
     }
 
-    pub fn client(&self) -> &tongbal_api::Client {
+    pub fn client(&self) -> &tongbal_api::UserClient {
         &self.user_client
     }
 }

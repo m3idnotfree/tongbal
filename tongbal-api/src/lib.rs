@@ -14,7 +14,7 @@ mod client;
 mod error;
 mod response;
 
-pub use client::{AppClient, BaseClient, Client};
+pub use client::{AppClient, BaseClient, UserClient};
 pub use error::Error;
 pub use response::APIResponse;
 

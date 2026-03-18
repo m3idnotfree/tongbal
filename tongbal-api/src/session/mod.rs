@@ -9,7 +9,7 @@ pub use types::{EventType, Session, SubscribedEvent};
 use std::future::Future;
 
 use crate::{
-    APIResponse, AppClient, BaseClient, Client, Error,
+    APIResponse, AppClient, BaseClient, Error, UserClient,
     types::{
         SessionKey,
         constants::{
@@ -169,7 +169,7 @@ impl SessionAPI for AppClient {
     }
 }
 
-impl SessionAPI for Client {
+impl SessionAPI for UserClient {
     async fn create_session(&self) -> Result<APIResponse<CreateSessionResponse>, Error> {
         let mut url = self.base_url();
         url.path_segments_mut().unwrap().extend([SESSIONS, AUTH]);

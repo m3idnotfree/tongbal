@@ -19,7 +19,7 @@ pub trait BaseClient {
 }
 
 #[derive(Debug, Clone)]
-pub struct Client {
+pub struct UserClient {
     url: Url,
     client: reqwest::Client,
 }
@@ -30,7 +30,7 @@ pub struct AppClient {
     client: reqwest::Client,
 }
 
-impl Client {
+impl UserClient {
     pub fn new(access_token: AccessToken) -> Self {
         let mut client = preset::rest_api(concat!(
             env!("CARGO_PKG_NAME"),
@@ -118,7 +118,7 @@ impl AppClient {
     }
 }
 
-impl BaseClient for Client {
+impl BaseClient for UserClient {
     fn http_client(&self) -> &reqwest::Client {
         &self.client
     }

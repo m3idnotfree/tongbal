@@ -1,18 +1,18 @@
 use crate::{
-    APIResponse, BaseClient, Client, Error,
+    APIResponse, BaseClient, Error, UserClient,
     types::constants::{CHANNELS, FOLLOWERS, PAGE, SIZE, SORT, SUBSCRIBERS},
 };
 
 use super::{FollowersResponse, Sort, SubscribersResponse};
 
 pub struct GetChannelFollower<'a> {
-    client: &'a Client,
+    client: &'a UserClient,
     page: Option<u64>,
     size: Option<u64>,
 }
 
 impl<'a> GetChannelFollower<'a> {
-    pub(crate) fn new(client: &'a Client) -> Self {
+    pub(crate) fn new(client: &'a UserClient) -> Self {
         Self {
             client,
             page: None,
@@ -49,14 +49,14 @@ impl<'a> GetChannelFollower<'a> {
 }
 
 pub struct GetChannelSubscriber<'a> {
-    client: &'a Client,
+    client: &'a UserClient,
     page: Option<u64>,
     size: Option<u64>,
     sort: Option<Sort>,
 }
 
 impl<'a> GetChannelSubscriber<'a> {
-    pub(crate) fn new(client: &'a Client) -> Self {
+    pub(crate) fn new(client: &'a UserClient) -> Self {
         Self {
             client,
             page: None,

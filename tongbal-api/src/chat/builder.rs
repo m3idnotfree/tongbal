@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::{
-    BaseClient, Client, Error,
+    BaseClient, Error, UserClient,
     types::{
         MessageId,
         constants::{CHATS, NOTICE, SETTINGS},
@@ -12,13 +12,13 @@ use super::{ChatCondition, ChatGroup, ChatSlowModeSec, MinFollowerMinute, Notice
 
 #[derive(Debug)]
 pub struct SetChatNotice<'a> {
-    client: &'a Client,
+    client: &'a UserClient,
     message: Option<&'a str>,
     message_id: Option<&'a MessageId>,
 }
 
 impl<'a> SetChatNotice<'a> {
-    pub(crate) fn new(client: &'a Client) -> Self {
+    pub(crate) fn new(client: &'a UserClient) -> Self {
         Self {
             client,
             message: None,
@@ -53,7 +53,7 @@ impl<'a> SetChatNotice<'a> {
 #[serde(rename_all = "camelCase")]
 pub struct SetChatSettings<'a> {
     #[serde(skip)]
-    client: &'a Client,
+    client: &'a UserClient,
     chat_available_condition: Option<ChatCondition>,
     chat_available_group: Option<ChatGroup>,
     min_follower_minute: Option<MinFollowerMinute>,
@@ -63,7 +63,7 @@ pub struct SetChatSettings<'a> {
 }
 
 impl<'a> SetChatSettings<'a> {
-    pub(crate) fn new(client: &'a Client) -> Self {
+    pub(crate) fn new(client: &'a UserClient) -> Self {
         Self {
             client,
             chat_available_condition: None,
