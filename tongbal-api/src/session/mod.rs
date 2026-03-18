@@ -1,3 +1,5 @@
+pub mod message;
+
 mod builder;
 mod response;
 mod types;
