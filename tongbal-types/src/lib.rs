@@ -1,14 +1,10 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod category;
+pub mod new_types;
+pub mod session;
+pub mod subscribed_event;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod response;
+mod tier;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use response::Response;
+pub use tier::Tier;
