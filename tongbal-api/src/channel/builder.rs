@@ -1,5 +1,5 @@
 use crate::{
-    APIResponse, BaseClient, Error, UserClient,
+    BaseClient, Error, Response, UserClient,
     types::constants::{CHANNELS, FOLLOWERS, PAGE, SIZE, SORT, SUBSCRIBERS},
 };
 
@@ -30,7 +30,7 @@ impl<'a> GetChannelFollower<'a> {
         self
     }
 
-    pub async fn send(self) -> Result<APIResponse<FollowersResponse>, Error> {
+    pub async fn send(self) -> Result<Response<FollowersResponse>, Error> {
         let mut url = self.client.base_url();
 
         url.path_segments_mut()
@@ -80,7 +80,7 @@ impl<'a> GetChannelSubscriber<'a> {
         self
     }
 
-    pub async fn send(self) -> Result<APIResponse<SubscribersResponse>, Error> {
+    pub async fn send(self) -> Result<Response<SubscribersResponse>, Error> {
         let mut url = self.client.base_url();
 
         url.path_segments_mut()

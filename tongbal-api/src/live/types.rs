@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 use crate::types::{CategoryType, ChannelId};
 
@@ -7,7 +8,7 @@ use crate::types::{CategoryType, ChannelId};
 pub struct Live {
     pub live_id: u64,
     pub live_title: String,
-    pub live_thumbnail_image_url: Option<String>,
+    pub live_thumbnail_image_url: Option<Url>,
     pub concurrent_user_count: u64,
     pub open_date: String,
     pub adult: bool,
@@ -17,5 +18,5 @@ pub struct Live {
     pub live_category_value: String,
     pub channel_id: ChannelId,
     pub channel_name: String,
-    pub channel_image_url: Option<String>,
+    pub channel_image_url: Option<Url>,
 }

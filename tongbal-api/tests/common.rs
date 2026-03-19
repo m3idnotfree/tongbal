@@ -94,7 +94,7 @@ impl AppHttpMock {
                     {
                       "liveId": 0,
                       "liveTitle": "",
-                      "liveThumbnailImageUrl": "",
+                      "liveThumbnailImageUrl": "https://livecloud-thumb.akamaized.net",
                       "concurrentUserCount": 0,
                       "openDate": "",
                       "adult": false,
@@ -104,7 +104,7 @@ impl AppHttpMock {
                       "liveCategoryValue": "",
                       "channelId": "",
                       "channelName": "",
-                      "channelImageUrl": ""
+                      "channelImageUrl": "https://nng-phinf.pstatic.net"
                     }
                   ],
                   "page": { "next": "" }

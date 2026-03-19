@@ -1,5 +1,5 @@
 use crate::{
-    APIResponse, BaseClient, Error, UserClient,
+    BaseClient, Error, Response, UserClient,
     types::constants::{NEXT, RESTRICT_CHANNELS, SIZE},
 };
 
@@ -31,7 +31,7 @@ impl<'a> GetRestriction<'a> {
         self
     }
 
-    pub async fn send(self) -> Result<APIResponse<RestrictionChannelResponse>, Error> {
+    pub async fn send(self) -> Result<Response<RestrictionChannelResponse>, Error> {
         let mut url = self.client.base_url();
 
         url.path_segments_mut().unwrap().push(RESTRICT_CHANNELS);

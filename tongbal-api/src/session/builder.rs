@@ -1,5 +1,5 @@
 use crate::{
-    APIResponse, BaseClient, Error,
+    BaseClient, Error, Response,
     types::constants::{PAGE, SESSIONS, SIZE},
 };
 
@@ -36,7 +36,7 @@ where
         self
     }
 
-    pub async fn send(self) -> Result<APIResponse<SessionResponse>, Error> {
+    pub async fn send(self) -> Result<Response<SessionResponse>, Error> {
         let mut url = self.client.base_url();
 
         url.path_segments_mut().unwrap().push(SESSIONS);

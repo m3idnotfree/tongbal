@@ -5,7 +5,7 @@ pub use response::CategoryResponse;
 use std::future::Future;
 
 use crate::{
-    APIResponse, AppClient, BaseClient, Error,
+    AppClient, BaseClient, Error, Response,
     types::constants::{CATEGORIES, QUERY, SEARCH, SIZE},
 };
 
@@ -15,7 +15,7 @@ pub trait CategoryAPI: BaseClient {
         &self,
         query: &str,
         size: Option<usize>,
-    ) -> impl Future<Output = Result<APIResponse<CategoryResponse>, Error>> + Send;
+    ) -> impl Future<Output = Result<Response<CategoryResponse>, Error>> + Send;
 }
 
 impl CategoryAPI for AppClient {
@@ -23,7 +23,7 @@ impl CategoryAPI for AppClient {
         &self,
         query: &str,
         size: Option<usize>,
-    ) -> Result<APIResponse<CategoryResponse>, Error> {
+    ) -> Result<Response<CategoryResponse>, Error> {
         let mut url = self.base_url();
 
         url.path_segments_mut()

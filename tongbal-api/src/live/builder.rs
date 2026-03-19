@@ -2,6 +2,7 @@ use serde::Serialize;
 
 use crate::{
     BaseClient, Error, UserClient,
+    types::CategoryId,
     types::{
         CategoryType,
         constants::{LIVES, SETTING},
@@ -18,7 +19,7 @@ pub struct SetStreamSetting<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     category: Option<CategoryType>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    category_id: Option<String>,
+    category_id: Option<CategoryId>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     tags: Vec<String>,
 }
@@ -44,8 +45,8 @@ impl<'a> SetStreamSetting<'a> {
         self
     }
 
-    pub fn category_id(mut self, category_id: impl Into<String>) -> Self {
-        self.category_id = Some(category_id.into());
+    pub fn category_id(mut self, category_id: CategoryId) -> Self {
+        self.category_id = Some(category_id);
         self
     }
 

@@ -1,6 +1,5 @@
-mod new_types;
-
-pub use new_types::{ChannelId, MessageId, SessionKey};
+pub use tongbal_types::category::{Category, CategoryType};
+pub use tongbal_types::new_types::{CategoryId, ChannelId, MessageId, SessionKey};
 
 use serde::{Deserialize, Serialize};
 
@@ -36,23 +35,6 @@ pub(crate) mod constants {
     pub const SUBSCRIPTION: &str = "subscription";
     pub const UNSUBSCRIBE: &str = "unsubscribe";
     pub const USERS: &str = "users";
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Category {
-    pub category_type: CategoryType,
-    pub category_id: String,
-    pub category_value: String,
-    pub poster_image_url: Option<String>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "UPPERCASE")]
-pub enum CategoryType {
-    Game,
-    Sports,
-    Etc,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

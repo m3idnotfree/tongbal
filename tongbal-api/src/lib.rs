@@ -12,10 +12,9 @@ pub mod user;
 
 mod client;
 mod error;
-mod response;
 
 pub use client::{AppClient, BaseClient, UserClient};
 pub use error::Error;
-pub use response::APIResponse;
 
 pub use asknothingx2_util::oauth::{AccessToken, ClientId, ClientSecret};
+pub use tongbal_types::Response;

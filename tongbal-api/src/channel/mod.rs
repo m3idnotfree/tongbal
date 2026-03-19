@@ -2,14 +2,16 @@ mod builder;
 mod response;
 mod types;
 
+pub use tongbal_types::Tier;
+
 pub use builder::{GetChannelFollower, GetChannelSubscriber};
 pub use response::{ChannelResponse, FollowersResponse, ModeratorResponse, SubscribersResponse};
-pub use types::{Channel, Follower, Moderator, Sort, Subscriber, Tier, UserRole};
+pub use types::{Channel, Follower, Moderator, Sort, Subscriber, UserRole};
 
 use std::future::Future;
 
 use crate::{
-    APIResponse, AppClient, BaseClient, Error, UserClient,
+    AppClient, BaseClient, Error, Response, UserClient,
     types::{
         ChannelId,
         constants::{CHANNELIDS, CHANNELS},
@@ -20,7 +22,7 @@ pub trait UserChannelAPI: BaseClient {
     /// See <https://chzzk.gitbook.io/chzzk/chzzk-api/channel#undefined-1>
     fn get_channel_moderators(
         &self,
-    ) -> impl Future<Output = Result<APIResponse<ModeratorResponse>, Error>> + Send;
+    ) -> impl Future<Output = Result<Response<ModeratorResponse>, Error>> + Send;
 
     /// See <https://chzzk.gitbook.io/chzzk/chzzk-api/channel#undefined-2>
     fn get_channel_followers<'a>(&'a self) -> GetChannelFollower<'a>;
@@ -34,14 +36,14 @@ pub trait AppChannelAPI: BaseClient {
     fn get_channels(
         &self,
         channel_ids: &[ChannelId],
-    ) -> impl Future<Output = Result<APIResponse<ChannelResponse>, Error>> + Send;
+    ) -> impl Future<Output = Result<Response<ChannelResponse>, Error>> + Send;
 }
 
 impl AppChannelAPI for AppClient {
     async fn get_channels(
         &self,
         channel_ids: &[ChannelId],
-    ) -> Result<APIResponse<ChannelResponse>, Error> {
+    ) -> Result<Response<ChannelResponse>, Error> {
         let mut url = self.base_url();
 
         url.path_segments_mut().unwrap().push(CHANNELS);
@@ -54,7 +56,7 @@ impl AppChannelAPI for AppClient {
 }
 
 impl UserChannelAPI for UserClient {
-    async fn get_channel_moderators(&self) -> Result<APIResponse<ModeratorResponse>, Error> {
+    async fn get_channel_moderators(&self) -> Result<Response<ModeratorResponse>, Error> {
         let mut url = self.base_url();
 
         url.path_segments_mut()

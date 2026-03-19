@@ -1,4 +1,6 @@
-pub mod message;
+pub mod message {
+    pub use tongbal_types::session::*;
+}
 
 mod builder;
 mod response;
@@ -6,12 +8,13 @@ mod types;
 
 pub use builder::GetSession;
 pub use response::{CreateSessionResponse, SessionResponse};
-pub use types::{EventType, Session, SubscribedEvent};
+pub use tongbal_types::subscribed_event::{EventType, SubscribedEvent};
+pub use types::Session;
 
 use std::future::Future;
 
 use crate::{
-    APIResponse, AppClient, BaseClient, Error, UserClient,
+    AppClient, BaseClient, Error, Response, UserClient,
     types::{
         SessionKey,
         constants::{
@@ -26,7 +29,7 @@ pub trait SessionAPI: BaseClient {
     /// See <https://chzzk.gitbook.io/chzzk/chzzk-api/session#undefined-1>
     fn create_session(
         &self,
-    ) -> impl Future<Output = Result<APIResponse<CreateSessionResponse>, Error>> + Send;
+    ) -> impl Future<Output = Result<Response<CreateSessionResponse>, Error>> + Send;
 
     /// See <https://chzzk.gitbook.io/chzzk/chzzk-api/session#undefined-3>
     /// See <https://chzzk.gitbook.io/chzzk/chzzk-api/session#undefined-4>
@@ -72,7 +75,7 @@ pub trait SessionAPI: BaseClient {
 }
 
 impl SessionAPI for AppClient {
-    async fn create_session(&self) -> Result<APIResponse<CreateSessionResponse>, Error> {
+    async fn create_session(&self) -> Result<Response<CreateSessionResponse>, Error> {
         let mut url = self.base_url();
 
         url.path_segments_mut()
@@ -172,7 +175,7 @@ impl SessionAPI for AppClient {
 }
 
 impl SessionAPI for UserClient {
-    async fn create_session(&self) -> Result<APIResponse<CreateSessionResponse>, Error> {
+    async fn create_session(&self) -> Result<Response<CreateSessionResponse>, Error> {
         let mut url = self.base_url();
         url.path_segments_mut().unwrap().extend([SESSIONS, AUTH]);
         crate::client::json(self.http_client().get(url)).await
