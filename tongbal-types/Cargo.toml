@@ -1,0 +1,12 @@
+[package]
+name = "tongbal-types"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+description = "Shared types for the Chzzk API"
+documentation = "https://docs.rs/tongbal-types"
+license.workspace = true
+keywords = ["chzzk", "types"]
+categories = ["api-bindings"]
+
+[dependencies]
