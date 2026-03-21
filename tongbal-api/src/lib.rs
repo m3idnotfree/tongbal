@@ -16,5 +16,4 @@ mod error;
 pub use client::{AppClient, BaseClient, UserClient};
 pub use error::Error;
 
-pub use asknothingx2_util::oauth::{AccessToken, ClientId, ClientSecret};
-pub use tongbal_types::Response;
+pub use tongbal_types::{AccessToken, ClientId, ClientSecret, Response};
