@@ -82,14 +82,13 @@ mod types;
 
 pub use error::Error;
 pub use oauth::TongbalOauth;
-pub use response::APIResponse;
 pub use tokens::Token;
 pub use types::AuthCallback;
 
 pub use asknothingx2_util::oauth::{
-    AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, RefreshToken,
-    RevocationUrl, TokenUrl,
+    AuthUrl, AuthorizationCode, RedirectUrl, RefreshToken, RevocationUrl, TokenUrl,
 };
+pub use tongbal_types::{AccessToken, ClientId, ClientSecret, Response};
 
 pub mod csrf {
     pub use asknothingx2_util::oauth::signed_token::{

@@ -5,8 +5,8 @@ use reqwest::Client;
 use url::Url;
 
 use crate::{
-    APIResponse, AuthUrl, AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl,
-    RefreshToken, RevocationUrl, Token, TokenUrl,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response,
+    RevocationUrl, Token, TokenUrl,
     csrf::{self, CsrfConfig, generate, generate_secret_key},
     request::{ExchangeCode, RefreshRequest, RevokeRequest},
     response::ErrorResponse,
@@ -138,7 +138,7 @@ impl TongbalOauth {
         &self,
         code: AuthorizationCode,
         state: String,
-    ) -> Result<APIResponse<Token>, Error> {
+    ) -> Result<Response<Token>, Error> {
         if csrf::verify_with_config(
             &self.secret_key,
             &state,
@@ -164,7 +164,7 @@ impl TongbalOauth {
     pub async fn refresh_token(
         &self,
         refresh_token: RefreshToken,
-    ) -> Result<APIResponse<Token>, Error> {
+    ) -> Result<Response<Token>, Error> {
         let req = RefreshRequest::new(
             &self.token_url,
             &self.client_id,
