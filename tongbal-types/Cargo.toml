@@ -5,6 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 description = "Shared types for the Chzzk API"
 documentation = "https://docs.rs/tongbal-types"
+repository = "https://github.com/m3idnotfree/tongbal"
 license.workspace = true
 keywords = ["chzzk", "types"]
 categories = ["api-bindings"]

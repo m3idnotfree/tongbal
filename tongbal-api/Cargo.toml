@@ -5,6 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 description = "Chzzk API"
 documentation = "https://docs.rs/tongbal-api"
+repository = "https://github.com/m3idnotfree/tongbal"
 license.workspace = true
 keywords = ["api", "chzzk"]
 categories = ["api-bindings", "web-programming"]
