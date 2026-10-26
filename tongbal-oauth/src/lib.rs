@@ -76,7 +76,6 @@ pub mod client;
 mod error;
 mod oauth;
 mod request;
-mod response;
 mod tokens;
 mod types;
 

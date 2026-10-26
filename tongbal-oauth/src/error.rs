@@ -19,6 +19,7 @@ enum Kind {
     Setup,
     Build,
     Request,
+    Body,
     Api(Api),
     Parse,
     Csrf,
@@ -72,7 +73,7 @@ impl Error {
         match self.inner.kind {
             Kind::Setup => ErrorKind::Setup,
             Kind::Build => ErrorKind::Build,
-            Kind::Request => ErrorKind::Request,
+            Kind::Request | Kind::Body => ErrorKind::Request,
             Kind::Api(_) => ErrorKind::Api,
             Kind::Parse => ErrorKind::Parse,
             Kind::Csrf => ErrorKind::Csrf,
@@ -132,6 +133,7 @@ impl Display for Error {
             }
             Kind::Build => f.write_str("failed to build request")?,
             Kind::Request => f.write_str("failed to send request")?,
+            Kind::Body => f.write_str("failed to read response")?,
             Kind::Api(api) => {
                 write!(f, "unexpected HTTP status {}", api.code)?;
 
@@ -211,7 +213,24 @@ pub(crate) fn request(operation: Operation, source: impl Into<BoxError>) -> Erro
     }
 }
 
-pub(crate) fn api(operation: Operation, code: u16, message: String) -> Error {
+pub(crate) fn body(operation: Operation, source: BoxError) -> Error {
+    match source.downcast::<reqwest::Error>() {
+        Ok(source) => Error::new(Kind::Body, operation, Some(source.without_url().into())),
+        Err(source) => Error::new(Kind::Body, operation, Some(source)),
+    }
+}
+
+pub(crate) fn api(operation: Operation, status: u16, body: &[u8]) -> Error {
+    #[derive(serde::Deserialize)]
+    struct ApiBody {
+        code: u16,
+        message: Option<String>,
+    }
+
+    let (code, message) = serde_json::from_slice::<ApiBody>(body)
+        .map(|body| (body.code, body.message.unwrap_or_default()))
+        .unwrap_or_else(|_| (status, String::from_utf8_lossy(body).into_owned()));
+
     Error::new(Kind::Api(Api { code, message }), operation, None)
 }
 

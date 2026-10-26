@@ -1,3 +1,4 @@
+use asknothingx2_http::{ClientService, client::Reqwest};
 use reqwest::Client;
 use url::Url;
 
@@ -6,7 +7,6 @@ use crate::{
     csrf::{self, CsrfConfig, generate, generate_secret_key},
     error,
     request::{AUTH_URL, ExchangeCode, IntoRequest, RefreshRequest, RevokeRequest},
-    response::ErrorResponse,
     types::{RevokeableToken, constants},
 };
 
@@ -18,6 +18,7 @@ pub struct TongbalOauth {
     secret_key: [u8; 32],
     csrf_config: CsrfConfig,
     client: Client,
+    svc: ClientService,
 }
 
 impl TongbalOauth {
@@ -33,6 +34,7 @@ impl TongbalOauth {
             secret_key: generate_secret_key(),
             csrf_config: CsrfConfig::default(),
             client: crate::client::get().clone(),
+            svc: ClientService::new(Reqwest::new(crate::client::get().clone())),
         }
     }
 
@@ -119,59 +121,78 @@ impl TongbalOauth {
         )
         .map_err(|e| error::csrf(error::Operation::ExchangeCode, e))?;
 
-        let req = ExchangeCode::new(&self.client_id, &self.client_secret, code, state);
-
-        self.send(req)
-            .await?
-            .json()
-            .await
-            .map_err(|e| error::parse(error::Operation::ExchangeCode, e))
+        self.json(ExchangeCode::new(
+            &self.client_id,
+            &self.client_secret,
+            code,
+            state,
+        ))
+        .await
     }
 
     pub async fn refresh_token(
         &self,
         refresh_token: RefreshToken,
     ) -> Result<Response<Token>, Error> {
-        let req = RefreshRequest::new(&self.client_id, &self.client_secret, refresh_token);
-
-        self.send(req)
-            .await?
-            .json()
-            .await
-            .map_err(|e| error::parse(error::Operation::RefreshToken, e))
+        self.json(RefreshRequest::new(
+            &self.client_id,
+            &self.client_secret,
+            refresh_token,
+        ))
+        .await
     }
 
     pub async fn revoke_token<T: RevokeableToken>(&self, token: T) -> Result<(), Error> {
-        let req = RevokeRequest::new(&self.client_id, &self.client_secret, token);
+        self.send(RevokeRequest::new(
+            &self.client_id,
+            &self.client_secret,
+            token,
+        ))
+        .await?;
 
-        self.send(req).await?;
         Ok(())
     }
 
-    async fn send<T>(&self, request: T) -> Result<reqwest::Response, Error>
+    async fn json<T, R>(&self, request: T) -> Result<R, Error>
     where
         T: IntoRequest,
+        R: serde::de::DeserializeOwned,
     {
+        let resp = self.send(request).await?;
+
+        let body = resp
+            .into_body()
+            .collect_bytes()
+            .await
+            .map_err(|e| error::body(T::OPERATION, e.into_inner()))?;
+
+        let mut de = serde_json::Deserializer::from_slice(&body);
+
+        let value =
+            serde_path_to_error::deserialize(&mut de).map_err(|e| error::parse(T::OPERATION, e))?;
+
+        de.end().map_err(|e| error::parse(T::OPERATION, e))?;
+
+        Ok(value)
+    }
+
+    async fn send<T: IntoRequest>(&self, request: T) -> Result<asknothingx2_http::Response, Error> {
         let req = request
             .into_request()
             .map_err(|e| error::build(T::OPERATION, e))?;
-        let req = reqwest::Request::try_from(req).map_err(|e| error::request(T::OPERATION, e))?;
 
         let resp = self
-            .client
+            .svc
+            .clone()
             .execute(req)
             .await
-            .map_err(|e| error::request(T::OPERATION, e))?;
+            .map_err(|e| error::request(T::OPERATION, e.into_inner()))?;
 
         if !resp.status().is_success() {
             let status = resp.status().as_u16();
-            let v = resp.bytes().await.unwrap_or_default();
+            let body = resp.into_body().collect_bytes().await.unwrap_or_default();
 
-            let (code, message) = serde_json::from_slice::<ErrorResponse>(&v)
-                .map(|f| (f.code, f.message.unwrap_or_default()))
-                .unwrap_or_else(|_| (status, String::from_utf8_lossy(&v).into_owned()));
-
-            return Err(error::api(T::OPERATION, code, message));
+            return Err(error::api(T::OPERATION, status, &body));
         }
 
         Ok(resp)
