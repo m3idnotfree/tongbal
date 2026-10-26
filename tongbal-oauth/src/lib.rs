@@ -6,11 +6,11 @@
 //!
 //! ```no_run
 //! use std::str::FromStr;
-//! use tongbal_oauth::{ClientId, ClientSecret, RedirectUrl, TongbalOauth};
+//! use tongbal_oauth::{Client, ClientId, ClientSecret, RedirectUrl};
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let oauth = TongbalOauth::new(
+//!     let oauth = Client::new(
 //!         ClientId::from("client_id"),
 //!         ClientSecret::from("client_secret"),
 //!         RedirectUrl::from_str("http://localhost:3000/auth/callback")?,
@@ -26,10 +26,10 @@
 //! ## Handling OAuth Callbacks
 //!
 //! ```no_run
-//! use tongbal_oauth::{AuthCallback, Error, TongbalOauth};
+//! use tongbal_oauth::{AuthCallback, Client, Error};
 //!
 //! async fn handle_callback(
-//!     oauth: &TongbalOauth,
+//!     oauth: &Client,
 //!     callback: AuthCallback,
 //! ) -> Result<(), Error> {
 //!     let token = oauth
@@ -45,8 +45,8 @@
 //! ### Refresh
 //!
 //! ```rust
-//! # use tongbal_oauth::{Error, RefreshToken, TongbalOauth};
-//! # async fn run(oauth: TongbalOauth, refresh_token: RefreshToken) -> Result<(), Error> {
+//! # use tongbal_oauth::{Client, Error, RefreshToken};
+//! # async fn run(oauth: Client, refresh_token: RefreshToken) -> Result<(), Error> {
 //! let new_token = oauth.refresh_token(refresh_token).await?;
 //! # Ok(())
 //! # }
@@ -57,8 +57,8 @@
 //! Both [`AccessToken`] and [`RefreshToken`] can be revoked.
 //!
 //! ```rust
-//! # use tongbal_oauth::{AccessToken, Error, RefreshToken, TongbalOauth};
-//! # async fn run(oauth: TongbalOauth, access_token: AccessToken, refresh_token: RefreshToken) -> Result<(), Error> {
+//! # use tongbal_oauth::{AccessToken, Client, Error, RefreshToken};
+//! # async fn run(oauth: Client, access_token: AccessToken, refresh_token: RefreshToken) -> Result<(), Error> {
 //! oauth.revoke_token(access_token).await?;
 //! oauth.revoke_token(refresh_token).await?;
 //! # Ok(())
@@ -70,14 +70,14 @@
 //! A suitable HTTP client for authorization is used by default.
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+mod client;
 mod error;
-mod oauth;
 mod request;
 mod tokens;
 mod types;
 
+pub use client::Client;
 pub use error::{Error, ErrorKind};
-pub use oauth::TongbalOauth;
 pub use tokens::Token;
 pub use types::AuthCallback;
 

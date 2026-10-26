@@ -11,7 +11,7 @@ use axum::{
 use axum_extra::extract::{CookieJar, cookie::Cookie};
 use time::Duration;
 use tokio::{net::TcpListener, sync::RwLock};
-use tongbal_oauth::{AuthCallback, ClientId, ClientSecret, RedirectUrl, Token, TongbalOauth};
+use tongbal_oauth::{AuthCallback, ClientId, ClientSecret, RedirectUrl, Token, Client};
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     info!("Starting Tongbal OAuth server");
 
-    let oauth = TongbalOauth::new(config.client_id, config.client_secret, config.redirect_uri);
+    let oauth = Client::new(config.client_id, config.client_secret, config.redirect_uri);
 
     info!("Login  : http://localhost:{}/auth/chzzk", config.port);
     info!("Logout : http://localhost:{}/auth/logout", config.port);
@@ -187,7 +187,7 @@ type TokenStore = Arc<RwLock<HashMap<String, Token>>>;
 
 #[derive(Clone)]
 struct AppState {
-    oauth: TongbalOauth,
+    oauth: Client,
     tokens: TokenStore,
 }
 

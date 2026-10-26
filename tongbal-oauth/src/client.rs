@@ -1,5 +1,4 @@
 use asknothingx2_http::{ClientService, client::Reqwest};
-use reqwest::Client;
 use url::Url;
 
 use crate::{
@@ -11,7 +10,7 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct TongbalOauth {
+pub struct Client {
     client_id: ClientId,
     client_secret: ClientSecret,
     redirect_uri: RedirectUrl,
@@ -20,7 +19,7 @@ pub struct TongbalOauth {
     svc: ClientService,
 }
 
-impl TongbalOauth {
+impl Client {
     pub fn new(
         client_id: ClientId,
         client_secret: ClientSecret,
@@ -55,7 +54,7 @@ impl TongbalOauth {
         self
     }
 
-    pub fn with_client(mut self, client: Client) -> Self {
+    pub fn with_client(mut self, client: reqwest::Client) -> Self {
         self.svc = ClientService::new(Reqwest::new(client));
         self
     }
