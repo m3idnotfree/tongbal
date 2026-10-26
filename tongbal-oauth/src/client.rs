@@ -38,7 +38,7 @@
 //! use asknothingx2_util::api::preset;
 //! use tongbal_oauth::{client, TongbalOauth};
 //!
-//! # async fn run() -> Result<(), tongbal_oauth::Error> {
+//! # async fn run() -> Result<(), Box<dyn std::error::Error>> {
 //! let mut preset = preset::authentication("MyApp/1.0");
 //! preset
 //!     .timeouts(Duration::from_secs(60), Duration::from_secs(30))
@@ -60,7 +60,7 @@ use std::sync::OnceLock;
 use asknothingx2_util::api::preset;
 use reqwest::Client;
 
-use crate::Error;
+use crate::{Error, error};
 
 static CLIENT: OnceLock<Client> = OnceLock::new();
 
@@ -70,10 +70,10 @@ static CLIENT: OnceLock<Client> = OnceLock::new();
 /// timeouts, proxies, or other HTTP client configuration.
 pub fn setup(client: reqwest::Client) -> Result<(), Error> {
     if CLIENT.get().is_some() {
-        return Err(Error::ClientSetup);
+        return Err(error::setup());
     }
 
-    CLIENT.set(client).map_err(|_| Error::ClientSetup)?;
+    CLIENT.set(client).map_err(|_| error::setup())?;
 
     Ok(())
 }

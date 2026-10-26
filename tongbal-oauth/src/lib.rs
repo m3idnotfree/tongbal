@@ -80,7 +80,7 @@ mod response;
 mod tokens;
 mod types;
 
-pub use error::Error;
+pub use error::{Error, ErrorKind};
 pub use oauth::TongbalOauth;
 pub use tokens::Token;
 pub use types::AuthCallback;

@@ -8,6 +8,7 @@ use crate::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response,
     RevocationUrl, Token, TokenUrl,
     csrf::{self, CsrfConfig, generate, generate_secret_key},
+    error,
     request::{ExchangeCode, RefreshRequest, RevokeRequest},
     response::ErrorResponse,
     types::{RevokeableToken, constants},
@@ -139,16 +140,13 @@ impl TongbalOauth {
         code: AuthorizationCode,
         state: String,
     ) -> Result<Response<Token>, Error> {
-        if csrf::verify_with_config(
+        csrf::verify_with_config(
             &self.secret_key,
             &state,
             Some(&self.client_id),
             &self.csrf_config,
         )
-        .is_err()
-        {
-            return Err(Error::CsrfTokenMismatch);
-        }
+        .map_err(error::csrf)?;
 
         let req = ExchangeCode::new(
             &self.token_url,
@@ -158,7 +156,7 @@ impl TongbalOauth {
             state,
         );
 
-        self.send(req).await?.json().await.map_err(Error::from)
+        self.send(req).await?.json().await.map_err(error::parse)
     }
 
     pub async fn refresh_token(
@@ -172,7 +170,7 @@ impl TongbalOauth {
             refresh_token,
         );
 
-        self.send(req).await?.json().await.map_err(Error::from)
+        self.send(req).await?.json().await.map_err(error::parse)
     }
 
     pub async fn revoke_token<T: RevokeableToken>(&self, token: T) -> Result<(), Error> {
@@ -195,17 +193,17 @@ impl TongbalOauth {
             .into_request_builder(&self.client)?
             .send()
             .await
-            .map_err(Error::from)?;
+            .map_err(error::request)?;
 
         if !resp.status().is_success() {
             let status = resp.status().as_u16();
-            let v = resp.bytes().await?;
+            let v = resp.bytes().await.unwrap_or_default();
 
             let (code, message) = serde_json::from_slice::<ErrorResponse>(&v)
                 .map(|f| (f.code, f.message.unwrap_or_default()))
                 .unwrap_or_else(|_| (status, String::from_utf8_lossy(&v).into_owned()));
 
-            return Err(Error::OAuthError { code, message });
+            return Err(error::api(code, message));
         }
 
         Ok(resp)
