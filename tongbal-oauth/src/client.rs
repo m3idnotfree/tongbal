@@ -139,20 +139,7 @@ impl Client {
         self.csrf_config = config;
     }
 
-    pub fn auth_url(&self) -> Url {
-        let state = generate(&self.csrf_key, Some(&self.client_id));
-
-        let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");
-        url.query_pairs_mut().extend_pairs([
-            (constants::CLIENT_ID, self.client_id.as_ref()),
-            ("redirectUri", self.redirect_uri.as_ref()),
-            ("state", &state),
-        ]);
-
-        url
-    }
-
-    pub fn auth_url_with_state(&self) -> (Url, String) {
+    pub fn auth_url(&self) -> (Url, String) {
         let state = generate(&self.csrf_key, Some(&self.client_id));
 
         let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");

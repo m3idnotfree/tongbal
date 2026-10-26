@@ -16,7 +16,7 @@
 //!         RedirectUrl::from_str("http://localhost:3000/auth/callback")?,
 //!     );
 //!
-//!     let auth_url = oauth.auth_url();
+//!     let (auth_url, _state) = oauth.auth_url();
 //!     println!("Visit: {}", auth_url);
 //!
 //!     Ok(())
