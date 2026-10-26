@@ -7,7 +7,7 @@ use crate::{
     csrf::{self, generate, generate_secret_key},
     error,
     request::{AUTH_URL, ExchangeCode, IntoRequest, RefreshRequest, RevokeRequest},
-    types::{RevokeableToken, constants},
+    types::RevokeableToken,
 };
 
 pub struct ClientBuilder<L = Identity> {
@@ -144,7 +144,7 @@ impl Client {
 
         let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");
         url.query_pairs_mut().extend_pairs([
-            (constants::CLIENT_ID, self.client_id.as_ref()),
+            ("clientId", self.client_id.as_ref()),
             ("redirectUri", self.redirect_uri.as_ref()),
             ("state", &state),
         ]);

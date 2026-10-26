@@ -2,10 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{AccessToken, AuthorizationCode, RefreshToken};
 
-pub mod constants {
-    pub const CLIENT_ID: &str = "clientId";
-}
-
 #[derive(Debug, Clone, Deserialize)]
 pub struct AuthCallback {
     pub code: AuthorizationCode,
@@ -17,21 +13,6 @@ pub struct AuthCallback {
 pub enum GrantType {
     AuthorizationCode,
     RefreshToken,
-}
-
-impl GrantType {
-    fn as_str(&self) -> &str {
-        match self {
-            Self::AuthorizationCode => "authorization_code",
-            Self::RefreshToken => "refresh_token",
-        }
-    }
-}
-
-impl AsRef<str> for GrantType {
-    fn as_ref(&self) -> &str {
-        self.as_str()
-    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize)]
