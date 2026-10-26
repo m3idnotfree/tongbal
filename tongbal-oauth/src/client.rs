@@ -3,7 +3,7 @@ use tower_layer::{Identity, Layer, Stack};
 use url::Url;
 
 use crate::{
-    AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response, Token,
+    AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Token,
     csrf::{self, generate, generate_secret_key},
     error,
     request::{AUTH_URL, ExchangeCode, IntoRequest, RefreshRequest, RevokeRequest},
@@ -156,7 +156,7 @@ impl Client {
         &self,
         code: &AuthorizationCode,
         state: &str,
-    ) -> Result<Response<Token>, Error> {
+    ) -> Result<Token, Error> {
         csrf::verify_with_config(
             &self.csrf_key,
             state,
@@ -174,10 +174,7 @@ impl Client {
         .await
     }
 
-    pub async fn refresh_token(
-        &self,
-        refresh_token: &RefreshToken,
-    ) -> Result<Response<Token>, Error> {
+    pub async fn refresh_token(&self, refresh_token: &RefreshToken) -> Result<Token, Error> {
         self.json(RefreshRequest::new(
             &self.client_id,
             &self.client_secret,
@@ -213,12 +210,12 @@ impl Client {
 
         let mut de = serde_json::Deserializer::from_slice(&body);
 
-        let value =
+        let value: tongbal_types::Response<R> =
             serde_path_to_error::deserialize(&mut de).map_err(|e| error::parse(T::OPERATION, e))?;
 
         de.end().map_err(|e| error::parse(T::OPERATION, e))?;
 
-        Ok(value)
+        Ok(value.content)
     }
 
     async fn send<T: IntoRequest>(&self, request: T) -> Result<asknothingx2_http::Response, Error> {

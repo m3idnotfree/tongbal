@@ -82,7 +82,7 @@ pub use tokens::Token;
 pub use types::AuthCallback;
 
 pub use asknothingx2_util::oauth::{AuthorizationCode, RedirectUrl, RefreshToken};
-pub use tongbal_types::{AccessToken, ClientId, ClientSecret, Response};
+pub use tongbal_types::{AccessToken, ClientId, ClientSecret};
 
 pub mod csrf {
     pub use asknothingx2_util::oauth::signed_token::{
