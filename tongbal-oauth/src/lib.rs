@@ -76,7 +76,7 @@ mod request;
 mod tokens;
 mod types;
 
-pub use client::Client;
+pub use client::{Client, ClientBuilder};
 pub use error::{Error, ErrorKind};
 pub use tokens::Token;
 pub use types::AuthCallback;

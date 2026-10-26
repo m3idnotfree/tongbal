@@ -1,4 +1,5 @@
-use asknothingx2_http::{ClientService, client::Reqwest};
+use asknothingx2_http::{ClientService, HttpService, client::Reqwest};
+use tower_layer::{Identity, Layer, Stack};
 use url::Url;
 
 use crate::{
@@ -9,12 +10,89 @@ use crate::{
     types::{RevokeableToken, constants},
 };
 
+pub struct ClientBuilder<L = Identity> {
+    client_id: ClientId,
+    client_secret: ClientSecret,
+    redirect_uri: RedirectUrl,
+    csrf_key: Option<[u8; 32]>,
+    csrf_config: Option<CsrfConfig>,
+    layers: L,
+}
+
+impl ClientBuilder<Identity> {
+    pub fn new(
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_uri: RedirectUrl,
+    ) -> Self {
+        ClientBuilder {
+            client_id,
+            client_secret,
+            redirect_uri,
+            csrf_key: None,
+            csrf_config: None,
+            layers: Identity::new(),
+        }
+    }
+}
+
+impl<L> ClientBuilder<L> {
+    pub fn csrf_key(mut self, csrf_key: [u8; 32]) -> Self {
+        self.csrf_key = Some(csrf_key);
+        self
+    }
+
+    pub fn csrf_config(mut self, csrf_config: CsrfConfig) -> Self {
+        self.csrf_config = Some(csrf_config);
+        self
+    }
+
+    pub fn layer<T>(self, layer: T) -> ClientBuilder<Stack<T, L>> {
+        ClientBuilder {
+            client_id: self.client_id,
+            client_secret: self.client_secret,
+            redirect_uri: self.redirect_uri,
+            csrf_config: self.csrf_config,
+            csrf_key: self.csrf_key,
+            layers: Stack::new(layer, self.layers),
+        }
+    }
+
+    pub fn build(self) -> Client
+    where
+        L: Layer<Reqwest, Service: HttpService>,
+    {
+        self.http_client(crate::HTTP_CLIENT.clone())
+    }
+
+    pub fn http_client(self, http_client: reqwest::Client) -> Client
+    where
+        L: Layer<Reqwest, Service: HttpService>,
+    {
+        self.service(Reqwest::new(http_client))
+    }
+
+    pub fn service<S>(self, service: S) -> Client
+    where
+        L: Layer<S, Service: HttpService>,
+    {
+        Client {
+            client_id: self.client_id,
+            client_secret: self.client_secret,
+            redirect_uri: self.redirect_uri,
+            csrf_key: self.csrf_key.unwrap_or_else(generate_secret_key),
+            csrf_config: self.csrf_config.unwrap_or_default(),
+            svc: ClientService::new(self.layers.layer(service)),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Client {
     client_id: ClientId,
     client_secret: ClientSecret,
     redirect_uri: RedirectUrl,
-    secret_key: [u8; 32],
+    csrf_key: [u8; 32],
     csrf_config: CsrfConfig,
     svc: ClientService,
 }
@@ -25,14 +103,15 @@ impl Client {
         client_secret: ClientSecret,
         redirect_uri: RedirectUrl,
     ) -> Self {
-        Self {
-            client_id,
-            client_secret,
-            redirect_uri,
-            secret_key: generate_secret_key(),
-            csrf_config: CsrfConfig::default(),
-            svc: ClientService::new(Reqwest::new(crate::HTTP_CLIENT.clone())),
-        }
+        ClientBuilder::new(client_id, client_secret, redirect_uri).build()
+    }
+
+    pub fn builder(
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_uri: RedirectUrl,
+    ) -> ClientBuilder {
+        ClientBuilder::new(client_id, client_secret, redirect_uri)
     }
 
     pub fn client_id(&self) -> &ClientId {
@@ -44,31 +123,16 @@ impl Client {
         &self.client_secret
     }
 
-    pub fn with_secret_key(mut self, secret_key: [u8; 32]) -> Self {
-        self.secret_key = secret_key;
-        self
-    }
-
-    pub fn with_csrf_config(mut self, config: CsrfConfig) -> Self {
-        self.csrf_config = config;
-        self
-    }
-
-    pub fn with_client(mut self, client: reqwest::Client) -> Self {
-        self.svc = ClientService::new(Reqwest::new(client));
-        self
+    pub fn redirect_uri(&self) -> &RedirectUrl {
+        &self.redirect_uri
     }
 
     pub fn set_client_secret(&mut self, client_secret: ClientSecret) {
         self.client_secret = client_secret;
     }
 
-    pub fn set_redirect_uri(&mut self, redirect_uri: RedirectUrl) {
-        self.redirect_uri = redirect_uri;
-    }
-
-    pub fn set_secret_key(&mut self, secret_key: [u8; 32]) {
-        self.secret_key = secret_key;
+    pub fn set_csrf_key(&mut self, csrf_key: [u8; 32]) {
+        self.csrf_key = csrf_key;
     }
 
     pub fn set_csrf_config(&mut self, config: CsrfConfig) {
@@ -76,7 +140,7 @@ impl Client {
     }
 
     pub fn auth_url(&self) -> Url {
-        let state = generate(&self.secret_key, Some(&self.client_id));
+        let state = generate(&self.csrf_key, Some(&self.client_id));
 
         let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");
         url.query_pairs_mut().extend_pairs([
@@ -89,7 +153,7 @@ impl Client {
     }
 
     pub fn auth_url_with_state(&self) -> (Url, String) {
-        let state = generate(&self.secret_key, Some(&self.client_id));
+        let state = generate(&self.csrf_key, Some(&self.client_id));
 
         let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");
         url.query_pairs_mut().extend_pairs([
@@ -107,7 +171,7 @@ impl Client {
         state: String,
     ) -> Result<Response<Token>, Error> {
         csrf::verify_with_config(
-            &self.secret_key,
+            &self.csrf_key,
             &state,
             Some(&self.client_id),
             &self.csrf_config,
