@@ -4,7 +4,7 @@ use url::Url;
 
 use crate::{
     AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response, Token,
-    csrf::{self, CsrfConfig, generate, generate_secret_key},
+    csrf::{self, generate, generate_secret_key},
     error,
     request::{AUTH_URL, ExchangeCode, IntoRequest, RefreshRequest, RevokeRequest},
     types::{RevokeableToken, constants},
@@ -15,7 +15,7 @@ pub struct ClientBuilder<L = Identity> {
     client_secret: ClientSecret,
     redirect_uri: RedirectUrl,
     csrf_key: Option<[u8; 32]>,
-    csrf_config: Option<CsrfConfig>,
+    csrf_config: Option<csrf::Config>,
     layers: L,
 }
 
@@ -42,7 +42,7 @@ impl<L> ClientBuilder<L> {
         self
     }
 
-    pub fn csrf_config(mut self, csrf_config: CsrfConfig) -> Self {
+    pub fn csrf_config(mut self, csrf_config: csrf::Config) -> Self {
         self.csrf_config = Some(csrf_config);
         self
     }
@@ -93,7 +93,7 @@ pub struct Client {
     client_secret: ClientSecret,
     redirect_uri: RedirectUrl,
     csrf_key: [u8; 32],
-    csrf_config: CsrfConfig,
+    csrf_config: csrf::Config,
     svc: ClientService,
 }
 
@@ -135,7 +135,7 @@ impl Client {
         self.csrf_key = csrf_key;
     }
 
-    pub fn set_csrf_config(&mut self, config: CsrfConfig) {
+    pub fn set_csrf_config(&mut self, config: csrf::Config) {
         self.csrf_config = config;
     }
 
