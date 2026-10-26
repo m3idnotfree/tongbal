@@ -17,7 +17,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 asknothingx2-http = { workspace = true, features = ["reqwest"] }
 asknothingx2-util = { workspace = true, features = ["oauth"] }
-chrono.workspace = true
 http.workspace = true
 reqwest.workspace = true
 serde.workspace = true
