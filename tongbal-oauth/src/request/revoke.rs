@@ -1,9 +1,9 @@
-use asknothingx2_util::api::{IntoRequestBuilder, Method};
+use asknothingx2_http::{Body, HeaderMapExt};
 use serde::Serialize;
 
 use crate::{
-    ClientId, ClientSecret, Error,
-    request::REVOKE_URL,
+    ClientId, ClientSecret,
+    request::{IntoRequest, REVOKE_URL},
     types::{RevokeableToken, constants},
 };
 
@@ -41,16 +41,17 @@ impl<'a, T: RevokeableToken> Serialize for RevokeRequest<'a, T> {
     }
 }
 
-impl<'a, T> IntoRequestBuilder for RevokeRequest<'a, T>
+impl<T> IntoRequest for RevokeRequest<'_, T>
 where
     T: RevokeableToken,
 {
-    type Error = Error;
-    fn into_request_builder(
-        self,
-        client: &reqwest::Client,
-    ) -> Result<reqwest::RequestBuilder, Self::Error> {
-        Ok(client.request(Method::POST, REVOKE_URL).json(&self))
+    const OPERATION: crate::error::Operation = crate::error::Operation::RevokeToken;
+
+    fn into_request(self) -> Result<asknothingx2_http::Request, crate::error::BoxError> {
+        let body = serde_json::to_vec(&self)?;
+        let mut req = http::Request::post(REVOKE_URL).body(Body::from(body))?;
+        req.headers_mut().content_type_json();
+        Ok(req)
     }
 }
 

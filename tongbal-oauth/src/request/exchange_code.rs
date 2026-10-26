@@ -1,8 +1,10 @@
-use asknothingx2_util::api::{IntoRequestBuilder, Method};
+use asknothingx2_http::{Body, HeaderMapExt};
 use serde::Serialize;
 
 use crate::{
-    AuthorizationCode, ClientId, ClientSecret, Error, request::TOKEN_URL, types::GrantType,
+    AuthorizationCode, ClientId, ClientSecret,
+    request::{IntoRequest, TOKEN_URL},
+    types::GrantType,
 };
 
 #[derive(Serialize)]
@@ -32,13 +34,14 @@ impl<'a> ExchangeCode<'a> {
     }
 }
 
-impl<'a> IntoRequestBuilder for ExchangeCode<'a> {
-    type Error = Error;
-    fn into_request_builder(
-        self,
-        client: &reqwest::Client,
-    ) -> Result<reqwest::RequestBuilder, Self::Error> {
-        Ok(client.request(Method::POST, TOKEN_URL).json(&self))
+impl IntoRequest for ExchangeCode<'_> {
+    const OPERATION: crate::error::Operation = crate::error::Operation::ExchangeCode;
+
+    fn into_request(self) -> Result<asknothingx2_http::Request, crate::error::BoxError> {
+        let body = serde_json::to_vec(&self)?;
+        let mut req = http::Request::post(TOKEN_URL).body(Body::from(body))?;
+        req.headers_mut().content_type_json();
+        Ok(req)
     }
 }
 

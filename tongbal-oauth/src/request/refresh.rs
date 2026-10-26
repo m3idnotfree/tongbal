@@ -1,7 +1,11 @@
-use asknothingx2_util::api::{IntoRequestBuilder, Method};
+use asknothingx2_http::{Body, HeaderMapExt};
 use serde::Serialize;
 
-use crate::{ClientId, ClientSecret, Error, RefreshToken, request::TOKEN_URL, types::GrantType};
+use crate::{
+    ClientId, ClientSecret, RefreshToken,
+    request::{IntoRequest, TOKEN_URL},
+    types::GrantType,
+};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -27,13 +31,14 @@ impl<'a> RefreshRequest<'a> {
     }
 }
 
-impl<'a> IntoRequestBuilder for RefreshRequest<'a> {
-    type Error = Error;
-    fn into_request_builder(
-        self,
-        client: &reqwest::Client,
-    ) -> Result<reqwest::RequestBuilder, Self::Error> {
-        Ok(client.request(Method::POST, TOKEN_URL).json(&self))
+impl IntoRequest for RefreshRequest<'_> {
+    const OPERATION: crate::error::Operation = crate::error::Operation::RefreshToken;
+
+    fn into_request(self) -> Result<asknothingx2_http::Request, crate::error::BoxError> {
+        let body = serde_json::to_vec(&self)?;
+        let mut req = http::Request::post(TOKEN_URL).body(Body::from(body))?;
+        req.headers_mut().content_type_json();
+        Ok(req)
     }
 }
 

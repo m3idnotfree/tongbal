@@ -15,8 +15,10 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
+asknothingx2-http = { workspace = true, features = ["reqwest"] }
 asknothingx2-util = { workspace = true, features = ["api", "oauth"] }
 chrono.workspace = true
+http.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -25,10 +27,6 @@ url.workspace = true
 
 [dev-dependencies]
 anyhow = "1.0.102"
-asknothingx2-util = { workspace = true, features = [
-  "api",
-  "oauth",
-  "oauth-server"
-] }
+asknothingx2-util = { workspace = true, features = ["api", "oauth", "oauth-server"] }
 dotenvy = "0.15.7"
 tokio = { version = "1.50.0", features = ["full"] }

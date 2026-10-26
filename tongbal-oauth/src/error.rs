@@ -11,6 +11,7 @@ pub struct Error {
 
 struct Inner {
     kind: Kind,
+    operation: Operation,
     source: Option<BoxError>,
 }
 
@@ -93,9 +94,13 @@ impl Error {
         }
     }
 
-    fn new(kind: Kind, source: Option<BoxError>) -> Self {
+    fn new(kind: Kind, operation: Operation, source: Option<BoxError>) -> Self {
         Self {
-            inner: Box::new(Inner { kind, source }),
+            inner: Box::new(Inner {
+                kind,
+                operation,
+                source,
+            }),
         }
     }
 }
@@ -104,6 +109,7 @@ impl Debug for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         let mut builder = f.debug_struct("tongbal_oauth::Error");
         builder.field("kind", &self.kind());
+        builder.field("operation", &self.inner.operation.as_str());
 
         if let Kind::Api(api) = &self.inner.kind {
             builder.field("code", &api.code);
@@ -137,6 +143,8 @@ impl Display for Error {
             Kind::Csrf => f.write_str("failed to verify CSRF state")?,
         }
 
+        write!(f, " for {}", self.inner.operation)?;
+
         if let (Kind::Parse, Some(source)) = (&self.inner.kind, &self.inner.source) {
             write!(f, ": {source}")?;
         }
@@ -155,11 +163,40 @@ impl StdError for Error {
     }
 }
 
-pub(crate) fn setup() -> Error {
-    Error::new(Kind::Setup, None)
+#[derive(Copy, Clone)]
+pub(crate) enum Operation {
+    ExchangeCode,
+    RefreshToken,
+    RevokeToken,
+    Setup,
 }
 
-pub(crate) fn request(source: impl Into<BoxError>) -> Error {
+impl Operation {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::ExchangeCode => "exchange_code",
+            Self::RefreshToken => "refresh_token",
+            Self::RevokeToken => "revoke_token",
+            Self::Setup => "setup",
+        }
+    }
+}
+
+impl Display for Operation {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.write_str(self.as_str())
+    }
+}
+
+pub(crate) fn setup() -> Error {
+    Error::new(Kind::Setup, Operation::Setup, None)
+}
+
+pub(crate) fn build(operation: Operation, source: impl Into<BoxError>) -> Error {
+    Error::new(Kind::Build, operation, Some(source.into()))
+}
+
+pub(crate) fn request(operation: Operation, source: impl Into<BoxError>) -> Error {
     match source.into().downcast::<reqwest::Error>() {
         Ok(source) => {
             let kind = if source.is_builder() {
@@ -168,22 +205,22 @@ pub(crate) fn request(source: impl Into<BoxError>) -> Error {
                 Kind::Request
             };
 
-            Error::new(kind, Some(source.without_url().into()))
+            Error::new(kind, operation, Some(source.without_url().into()))
         }
-        Err(source) => Error::new(Kind::Request, Some(source)),
+        Err(source) => Error::new(Kind::Request, operation, Some(source)),
     }
 }
 
-pub(crate) fn api(code: u16, message: String) -> Error {
-    Error::new(Kind::Api(Api { code, message }), None)
+pub(crate) fn api(operation: Operation, code: u16, message: String) -> Error {
+    Error::new(Kind::Api(Api { code, message }), operation, None)
 }
 
-pub(crate) fn parse(source: impl Into<BoxError>) -> Error {
-    Error::new(Kind::Parse, Some(source.into()))
+pub(crate) fn parse(operation: Operation, source: impl Into<BoxError>) -> Error {
+    Error::new(Kind::Parse, operation, Some(source.into()))
 }
 
-pub(crate) fn csrf(source: impl Into<BoxError>) -> Error {
-    Error::new(Kind::Csrf, Some(source.into()))
+pub(crate) fn csrf(operation: Operation, source: impl Into<BoxError>) -> Error {
+    Error::new(Kind::Csrf, operation, Some(source.into()))
 }
 
 #[cfg(test)]

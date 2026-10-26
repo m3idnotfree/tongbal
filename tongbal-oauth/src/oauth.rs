@@ -1,4 +1,3 @@
-use asknothingx2_util::api::IntoRequestBuilder;
 use reqwest::Client;
 use url::Url;
 
@@ -6,7 +5,7 @@ use crate::{
     AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response, Token,
     csrf::{self, CsrfConfig, generate, generate_secret_key},
     error,
-    request::{AUTH_URL, ExchangeCode, RefreshRequest, RevokeRequest},
+    request::{AUTH_URL, ExchangeCode, IntoRequest, RefreshRequest, RevokeRequest},
     response::ErrorResponse,
     types::{RevokeableToken, constants},
 };
@@ -118,11 +117,15 @@ impl TongbalOauth {
             Some(&self.client_id),
             &self.csrf_config,
         )
-        .map_err(error::csrf)?;
+        .map_err(|e| error::csrf(error::Operation::ExchangeCode, e))?;
 
         let req = ExchangeCode::new(&self.client_id, &self.client_secret, code, state);
 
-        self.send(req).await?.json().await.map_err(error::parse)
+        self.send(req)
+            .await?
+            .json()
+            .await
+            .map_err(|e| error::parse(error::Operation::ExchangeCode, e))
     }
 
     pub async fn refresh_token(
@@ -131,7 +134,11 @@ impl TongbalOauth {
     ) -> Result<Response<Token>, Error> {
         let req = RefreshRequest::new(&self.client_id, &self.client_secret, refresh_token);
 
-        self.send(req).await?.json().await.map_err(error::parse)
+        self.send(req)
+            .await?
+            .json()
+            .await
+            .map_err(|e| error::parse(error::Operation::RefreshToken, e))
     }
 
     pub async fn revoke_token<T: RevokeableToken>(&self, token: T) -> Result<(), Error> {
@@ -141,15 +148,20 @@ impl TongbalOauth {
         Ok(())
     }
 
-    async fn send<T>(&self, request: T) -> Result<reqwest::Response, T::Error>
+    async fn send<T>(&self, request: T) -> Result<reqwest::Response, Error>
     where
-        T: IntoRequestBuilder<Error = Error>,
+        T: IntoRequest,
     {
-        let resp = request
-            .into_request_builder(&self.client)?
-            .send()
+        let req = request
+            .into_request()
+            .map_err(|e| error::build(T::OPERATION, e))?;
+        let req = reqwest::Request::try_from(req).map_err(|e| error::request(T::OPERATION, e))?;
+
+        let resp = self
+            .client
+            .execute(req)
             .await
-            .map_err(error::request)?;
+            .map_err(|e| error::request(T::OPERATION, e))?;
 
         if !resp.status().is_success() {
             let status = resp.status().as_u16();
@@ -159,7 +171,7 @@ impl TongbalOauth {
                 .map(|f| (f.code, f.message.unwrap_or_default()))
                 .unwrap_or_else(|_| (status, String::from_utf8_lossy(&v).into_owned()));
 
-            return Err(error::api(code, message));
+            return Err(error::api(T::OPERATION, code, message));
         }
 
         Ok(resp)
