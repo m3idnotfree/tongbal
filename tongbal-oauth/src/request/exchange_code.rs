@@ -1,13 +1,13 @@
 use asknothingx2_util::api::{IntoRequestBuilder, Method};
 use serde::Serialize;
 
-use crate::{AuthorizationCode, ClientId, ClientSecret, Error, TokenUrl, types::GrantType};
+use crate::{
+    AuthorizationCode, ClientId, ClientSecret, Error, request::TOKEN_URL, types::GrantType,
+};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExchangeCode<'a> {
-    #[serde(skip)]
-    token_url: &'a TokenUrl,
     grant_type: GrantType,
     client_id: &'a ClientId,
     client_secret: &'a ClientSecret,
@@ -17,7 +17,6 @@ pub struct ExchangeCode<'a> {
 
 impl<'a> ExchangeCode<'a> {
     pub fn new(
-        token_url: &'a TokenUrl,
         client_id: &'a ClientId,
         client_secret: &'a ClientSecret,
         code: AuthorizationCode,
@@ -25,7 +24,6 @@ impl<'a> ExchangeCode<'a> {
     ) -> Self {
         Self {
             grant_type: GrantType::AuthorizationCode,
-            token_url,
             client_id,
             client_secret,
             code,
@@ -40,30 +38,24 @@ impl<'a> IntoRequestBuilder for ExchangeCode<'a> {
         self,
         client: &reqwest::Client,
     ) -> Result<reqwest::RequestBuilder, Self::Error> {
-        Ok(client
-            .request(Method::POST, self.token_url.to_url())
-            .json(&self))
+        Ok(client.request(Method::POST, TOKEN_URL).json(&self))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
-    use crate::{AuthorizationCode, ClientId, ClientSecret, TokenUrl};
+    use crate::{AuthorizationCode, ClientId, ClientSecret};
 
     use super::ExchangeCode;
 
     #[test]
     fn request_body() {
-        let token_url =
-            TokenUrl::from_str("https://openapi.chzzk.naver.com/auth/v1/token").unwrap();
         let client_id = ClientId::from("client_id");
         let client_secret = ClientSecret::from("client_secret");
         let code = AuthorizationCode::from("test_code");
         let state = "test_state".to_string();
 
-        let req = ExchangeCode::new(&token_url, &client_id, &client_secret, code, state);
+        let req = ExchangeCode::new(&client_id, &client_secret, code, state);
         let body = serde_json::to_value(&req).unwrap();
 
         assert_eq!(body["grantType"], "authorization_code");

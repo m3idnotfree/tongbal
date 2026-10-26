@@ -2,12 +2,12 @@ use asknothingx2_util::api::{IntoRequestBuilder, Method};
 use serde::Serialize;
 
 use crate::{
-    ClientId, ClientSecret, Error, RevocationUrl,
+    ClientId, ClientSecret, Error,
+    request::REVOKE_URL,
     types::{RevokeableToken, constants},
 };
 
 pub struct RevokeRequest<'a, T> {
-    revoke_url: &'a RevocationUrl,
     client_id: &'a ClientId,
     client_secret: &'a ClientSecret,
     token: T,
@@ -17,14 +17,8 @@ impl<'a, T> RevokeRequest<'a, T>
 where
     T: RevokeableToken,
 {
-    pub fn new(
-        revoke_url: &'a RevocationUrl,
-        client_id: &'a ClientId,
-        client_secret: &'a ClientSecret,
-        token: T,
-    ) -> Self {
+    pub fn new(client_id: &'a ClientId, client_secret: &'a ClientSecret, token: T) -> Self {
         Self {
-            revoke_url,
             client_id,
             client_secret,
             token,
@@ -56,30 +50,23 @@ where
         self,
         client: &reqwest::Client,
     ) -> Result<reqwest::RequestBuilder, Self::Error> {
-        Ok(client
-            .request(Method::POST, self.revoke_url.to_url())
-            .json(&self))
+        Ok(client.request(Method::POST, REVOKE_URL).json(&self))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
-    use crate::{AccessToken, ClientId, ClientSecret, RefreshToken, RevocationUrl};
+    use crate::{AccessToken, ClientId, ClientSecret, RefreshToken};
 
     use super::RevokeRequest;
 
     #[test]
     fn request_body_with_access_token() {
-        let revoke_url =
-            RevocationUrl::from_str("https://openapi.chzzk.naver.com/auth/v1/token/revoke")
-                .unwrap();
         let client_id = ClientId::from("client_id");
         let client_secret = ClientSecret::from("client_secret");
         let token = AccessToken::from("test_access_token");
 
-        let req = RevokeRequest::new(&revoke_url, &client_id, &client_secret, token);
+        let req = RevokeRequest::new(&client_id, &client_secret, token);
         let body = serde_json::to_value(&req).unwrap();
 
         assert_eq!(body["clientId"], "client_id");
@@ -91,14 +78,11 @@ mod tests {
 
     #[test]
     fn request_body_with_refresh_token() {
-        let revoke_url =
-            RevocationUrl::from_str("https://openapi.chzzk.naver.com/auth/v1/token/revoke")
-                .unwrap();
         let client_id = ClientId::from("client_id");
         let client_secret = ClientSecret::from("client_secret");
         let token = RefreshToken::from("test_refresh_token");
 
-        let req = RevokeRequest::new(&revoke_url, &client_id, &client_secret, token);
+        let req = RevokeRequest::new(&client_id, &client_secret, token);
         let body = serde_json::to_value(&req).unwrap();
 
         assert_eq!(body["clientId"], "client_id");

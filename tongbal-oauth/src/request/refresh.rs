@@ -1,13 +1,11 @@
 use asknothingx2_util::api::{IntoRequestBuilder, Method};
 use serde::Serialize;
 
-use crate::{ClientId, ClientSecret, Error, RefreshToken, TokenUrl, types::GrantType};
+use crate::{ClientId, ClientSecret, Error, RefreshToken, request::TOKEN_URL, types::GrantType};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RefreshRequest<'a> {
-    #[serde(skip)]
-    token_url: &'a TokenUrl,
     grant_type: GrantType,
     client_id: &'a ClientId,
     client_secret: &'a ClientSecret,
@@ -16,13 +14,11 @@ pub struct RefreshRequest<'a> {
 
 impl<'a> RefreshRequest<'a> {
     pub fn new(
-        token_url: &'a TokenUrl,
         client_id: &'a ClientId,
         client_secret: &'a ClientSecret,
         refresh_token: RefreshToken,
     ) -> Self {
         Self {
-            token_url,
             grant_type: GrantType::RefreshToken,
             client_id,
             client_secret,
@@ -37,29 +33,23 @@ impl<'a> IntoRequestBuilder for RefreshRequest<'a> {
         self,
         client: &reqwest::Client,
     ) -> Result<reqwest::RequestBuilder, Self::Error> {
-        Ok(client
-            .request(Method::POST, self.token_url.to_url())
-            .json(&self))
+        Ok(client.request(Method::POST, TOKEN_URL).json(&self))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
-    use crate::{ClientId, ClientSecret, RefreshToken, TokenUrl};
+    use crate::{ClientId, ClientSecret, RefreshToken};
 
     use super::RefreshRequest;
 
     #[test]
     fn request_body() {
-        let token_url =
-            TokenUrl::from_str("https://openapi.chzzk.naver.com/auth/v1/token").unwrap();
         let client_id = ClientId::from("client_id");
         let client_secret = ClientSecret::from("client_secret");
         let refresh_token = RefreshToken::from("refresh_token");
 
-        let req = RefreshRequest::new(&token_url, &client_id, &client_secret, refresh_token);
+        let req = RefreshRequest::new(&client_id, &client_secret, refresh_token);
         let body = serde_json::to_value(&req).unwrap();
 
         assert_eq!(body["grantType"], "refresh_token");

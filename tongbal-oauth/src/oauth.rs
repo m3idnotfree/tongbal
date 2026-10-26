@@ -1,31 +1,21 @@
-use std::str::FromStr;
-
 use asknothingx2_util::api::IntoRequestBuilder;
 use reqwest::Client;
 use url::Url;
 
 use crate::{
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response,
-    RevocationUrl, Token, TokenUrl,
+    AuthorizationCode, ClientId, ClientSecret, Error, RedirectUrl, RefreshToken, Response, Token,
     csrf::{self, CsrfConfig, generate, generate_secret_key},
     error,
-    request::{ExchangeCode, RefreshRequest, RevokeRequest},
+    request::{AUTH_URL, ExchangeCode, RefreshRequest, RevokeRequest},
     response::ErrorResponse,
     types::{RevokeableToken, constants},
 };
-
-const AUTH_URL: &str = "https://chzzk.naver.com/account-interlock";
-const TOKEN_URL: &str = "https://openapi.chzzk.naver.com/auth/v1/token";
-const REVOKE_URL: &str = "https://openapi.chzzk.naver.com/auth/v1/token/revoke";
 
 #[derive(Clone)]
 pub struct TongbalOauth {
     client_id: ClientId,
     client_secret: ClientSecret,
     redirect_uri: RedirectUrl,
-    auth_url: AuthUrl,
-    token_url: TokenUrl,
-    revoke_url: RevocationUrl,
     secret_key: [u8; 32],
     csrf_config: CsrfConfig,
     client: Client,
@@ -41,9 +31,6 @@ impl TongbalOauth {
             client_id,
             client_secret,
             redirect_uri,
-            auth_url: AuthUrl::from_str(AUTH_URL).unwrap(),
-            token_url: TokenUrl::from_str(TOKEN_URL).unwrap(),
-            revoke_url: RevocationUrl::from_str(REVOKE_URL).unwrap(),
             secret_key: generate_secret_key(),
             csrf_config: CsrfConfig::default(),
             client: crate::client::get().clone(),
@@ -57,21 +44,6 @@ impl TongbalOauth {
     #[deprecated(note = "accessing client_secret is discouraged for security reasons")]
     pub fn client_secret(&self) -> &ClientSecret {
         &self.client_secret
-    }
-
-    pub fn with_auth_url(mut self, auth_url: AuthUrl) -> Self {
-        self.auth_url = auth_url;
-        self
-    }
-
-    pub fn with_token_url(mut self, token_url: TokenUrl) -> Self {
-        self.token_url = token_url;
-        self
-    }
-
-    pub fn with_rovoke_url(mut self, revoke_url: RevocationUrl) -> Self {
-        self.revoke_url = revoke_url;
-        self
     }
 
     pub fn with_secret_key(mut self, secret_key: [u8; 32]) -> Self {
@@ -112,7 +84,7 @@ impl TongbalOauth {
     pub fn auth_url(&self) -> Url {
         let state = generate(&self.secret_key, Some(&self.client_id));
 
-        let mut url = self.auth_url.to_url();
+        let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");
         url.query_pairs_mut().extend_pairs([
             (constants::CLIENT_ID, self.client_id.as_ref()),
             ("redirectUri", self.redirect_uri.as_ref()),
@@ -125,7 +97,7 @@ impl TongbalOauth {
     pub fn auth_url_with_state(&self) -> (Url, String) {
         let state = generate(&self.secret_key, Some(&self.client_id));
 
-        let mut url = self.auth_url.to_url();
+        let mut url = Url::parse(AUTH_URL).expect("AUTH_URL is a valid URL");
         url.query_pairs_mut().extend_pairs([
             (constants::CLIENT_ID, self.client_id.as_ref()),
             ("redirectUri", self.redirect_uri.as_ref()),
@@ -148,13 +120,7 @@ impl TongbalOauth {
         )
         .map_err(error::csrf)?;
 
-        let req = ExchangeCode::new(
-            &self.token_url,
-            &self.client_id,
-            &self.client_secret,
-            code,
-            state,
-        );
+        let req = ExchangeCode::new(&self.client_id, &self.client_secret, code, state);
 
         self.send(req).await?.json().await.map_err(error::parse)
     }
@@ -163,23 +129,13 @@ impl TongbalOauth {
         &self,
         refresh_token: RefreshToken,
     ) -> Result<Response<Token>, Error> {
-        let req = RefreshRequest::new(
-            &self.token_url,
-            &self.client_id,
-            &self.client_secret,
-            refresh_token,
-        );
+        let req = RefreshRequest::new(&self.client_id, &self.client_secret, refresh_token);
 
         self.send(req).await?.json().await.map_err(error::parse)
     }
 
     pub async fn revoke_token<T: RevokeableToken>(&self, token: T) -> Result<(), Error> {
-        let req = RevokeRequest::new(
-            &self.revoke_url,
-            &self.client_id,
-            &self.client_secret,
-            token,
-        );
+        let req = RevokeRequest::new(&self.client_id, &self.client_secret, token);
 
         self.send(req).await?;
         Ok(())
