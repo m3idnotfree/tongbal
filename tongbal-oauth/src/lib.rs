@@ -68,10 +68,7 @@
 //! ## HTTP Client
 //!
 //! A suitable HTTP client for authorization is used by default.
-//! If customization is needed, see [`client::setup`].
 #![cfg_attr(docsrs, feature(doc_cfg))]
-
-pub mod client;
 
 mod error;
 mod oauth;
@@ -94,3 +91,16 @@ pub mod csrf {
         verify, verify_at_time, verify_with_config,
     };
 }
+
+static HTTP_CLIENT: std::sync::LazyLock<reqwest::Client> = std::sync::LazyLock::new(|| {
+    asknothingx2_http::config::preset::authentication(
+        reqwest::Client::builder(),
+        http::HeaderValue::from_static(concat!(
+            env!("CARGO_PKG_NAME"),
+            "/",
+            env!("CARGO_PKG_VERSION")
+        )),
+    )
+    .build()
+    .expect("the default HTTP client configuration should be valid")
+});

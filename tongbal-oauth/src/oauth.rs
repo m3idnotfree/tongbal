@@ -17,7 +17,6 @@ pub struct TongbalOauth {
     redirect_uri: RedirectUrl,
     secret_key: [u8; 32],
     csrf_config: CsrfConfig,
-    client: Client,
     svc: ClientService,
 }
 
@@ -33,8 +32,7 @@ impl TongbalOauth {
             redirect_uri,
             secret_key: generate_secret_key(),
             csrf_config: CsrfConfig::default(),
-            client: crate::client::get().clone(),
-            svc: ClientService::new(Reqwest::new(crate::client::get().clone())),
+            svc: ClientService::new(Reqwest::new(crate::HTTP_CLIENT.clone())),
         }
     }
 
@@ -57,12 +55,8 @@ impl TongbalOauth {
         self
     }
 
-    /// Override the HTTP client
-    ///
-    /// Note: This only affects this OAuth instance, not the global client.
-    /// For global configuration, use [client::setup()](crate::client::setup()) instead.
     pub fn with_client(mut self, client: Client) -> Self {
-        self.client = client;
+        self.svc = ClientService::new(Reqwest::new(client));
         self
     }
 

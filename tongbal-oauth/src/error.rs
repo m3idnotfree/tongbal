@@ -16,7 +16,6 @@ struct Inner {
 }
 
 enum Kind {
-    Setup,
     Build,
     Request,
     Body,
@@ -33,7 +32,6 @@ struct Api {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum ErrorKind {
-    Setup,
     Build,
     Request,
     Api,
@@ -44,7 +42,6 @@ pub enum ErrorKind {
 impl ErrorKind {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::Setup => "setup",
             Self::Build => "build",
             Self::Request => "request",
             Self::Api => "api",
@@ -71,7 +68,6 @@ impl Error {
 
     pub fn kind(&self) -> ErrorKind {
         match self.inner.kind {
-            Kind::Setup => ErrorKind::Setup,
             Kind::Build => ErrorKind::Build,
             Kind::Request | Kind::Body => ErrorKind::Request,
             Kind::Api(_) => ErrorKind::Api,
@@ -128,9 +124,6 @@ impl Debug for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match &self.inner.kind {
-            Kind::Setup => {
-                f.write_str("HTTP client has already been initialized and cannot be reconfigured")?
-            }
             Kind::Build => f.write_str("failed to build request")?,
             Kind::Request => f.write_str("failed to send request")?,
             Kind::Body => f.write_str("failed to read response")?,
@@ -170,7 +163,6 @@ pub(crate) enum Operation {
     ExchangeCode,
     RefreshToken,
     RevokeToken,
-    Setup,
 }
 
 impl Operation {
@@ -179,7 +171,6 @@ impl Operation {
             Self::ExchangeCode => "exchange_code",
             Self::RefreshToken => "refresh_token",
             Self::RevokeToken => "revoke_token",
-            Self::Setup => "setup",
         }
     }
 }
@@ -188,10 +179,6 @@ impl Display for Operation {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         f.write_str(self.as_str())
     }
-}
-
-pub(crate) fn setup() -> Error {
-    Error::new(Kind::Setup, Operation::Setup, None)
 }
 
 pub(crate) fn build(operation: Operation, source: impl Into<BoxError>) -> Error {
