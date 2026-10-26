@@ -34,27 +34,21 @@ impl AsRef<str> for GrantType {
     }
 }
 
-pub trait RevokeableToken {
-    fn as_token_str(&self) -> &str;
-    fn type_hint(&self) -> &'static str;
+#[derive(Debug, Clone, Copy, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TokenTypeHint {
+    AccessToken,
+    RefreshToken,
+}
+
+pub trait RevokeableToken: AsRef<str> {
+    const TYPE_HINT: TokenTypeHint;
 }
 
 impl RevokeableToken for AccessToken {
-    fn as_token_str(&self) -> &str {
-        self.as_ref()
-    }
-
-    fn type_hint(&self) -> &'static str {
-        "access_token"
-    }
+    const TYPE_HINT: TokenTypeHint = TokenTypeHint::AccessToken;
 }
 
 impl RevokeableToken for RefreshToken {
-    fn as_token_str(&self) -> &str {
-        self.as_ref()
-    }
-
-    fn type_hint(&self) -> &'static str {
-        "refresh_token"
-    }
+    const TYPE_HINT: TokenTypeHint = TokenTypeHint::RefreshToken;
 }

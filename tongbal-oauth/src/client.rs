@@ -190,7 +190,8 @@ impl Client {
         self.send(RevokeRequest::new(
             &self.client_id,
             &self.client_secret,
-            token,
+            token.as_ref(),
+            T::TYPE_HINT,
         ))
         .await?;
 
