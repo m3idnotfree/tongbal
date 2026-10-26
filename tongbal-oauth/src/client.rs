@@ -154,12 +154,12 @@ impl Client {
 
     pub async fn exchange_code(
         &self,
-        code: AuthorizationCode,
-        state: String,
+        code: &AuthorizationCode,
+        state: &str,
     ) -> Result<Response<Token>, Error> {
         csrf::verify_with_config(
             &self.csrf_key,
-            &state,
+            state,
             Some(&self.client_id),
             &self.csrf_config,
         )
@@ -176,7 +176,7 @@ impl Client {
 
     pub async fn refresh_token(
         &self,
-        refresh_token: RefreshToken,
+        refresh_token: &RefreshToken,
     ) -> Result<Response<Token>, Error> {
         self.json(RefreshRequest::new(
             &self.client_id,
@@ -186,7 +186,7 @@ impl Client {
         .await
     }
 
-    pub async fn revoke_token<T: RevokeableToken>(&self, token: T) -> Result<(), Error> {
+    pub async fn revoke_token<T: RevokeableToken>(&self, token: &T) -> Result<(), Error> {
         self.send(RevokeRequest::new(
             &self.client_id,
             &self.client_secret,

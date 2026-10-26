@@ -13,16 +13,16 @@ pub struct ExchangeCode<'a> {
     grant_type: GrantType,
     client_id: &'a ClientId,
     client_secret: &'a ClientSecret,
-    code: AuthorizationCode,
-    state: String,
+    code: &'a AuthorizationCode,
+    state: &'a str,
 }
 
 impl<'a> ExchangeCode<'a> {
     pub fn new(
         client_id: &'a ClientId,
         client_secret: &'a ClientSecret,
-        code: AuthorizationCode,
-        state: String,
+        code: &'a AuthorizationCode,
+        state: &'a str,
     ) -> Self {
         Self {
             grant_type: GrantType::AuthorizationCode,
@@ -58,7 +58,7 @@ mod tests {
         let code = AuthorizationCode::from("test_code");
         let state = "test_state".to_string();
 
-        let req = ExchangeCode::new(&client_id, &client_secret, code, state);
+        let req = ExchangeCode::new(&client_id, &client_secret, &code, &state);
         let body = serde_json::to_value(&req).unwrap();
 
         assert_eq!(body["grantType"], "authorization_code");

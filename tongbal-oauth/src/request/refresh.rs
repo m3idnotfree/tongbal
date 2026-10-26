@@ -13,14 +13,14 @@ pub struct RefreshRequest<'a> {
     grant_type: GrantType,
     client_id: &'a ClientId,
     client_secret: &'a ClientSecret,
-    refresh_token: RefreshToken,
+    refresh_token: &'a RefreshToken,
 }
 
 impl<'a> RefreshRequest<'a> {
     pub fn new(
         client_id: &'a ClientId,
         client_secret: &'a ClientSecret,
-        refresh_token: RefreshToken,
+        refresh_token: &'a RefreshToken,
     ) -> Self {
         Self {
             grant_type: GrantType::RefreshToken,
@@ -54,7 +54,7 @@ mod tests {
         let client_secret = ClientSecret::from("client_secret");
         let refresh_token = RefreshToken::from("refresh_token");
 
-        let req = RefreshRequest::new(&client_id, &client_secret, refresh_token);
+        let req = RefreshRequest::new(&client_id, &client_secret, &refresh_token);
         let body = serde_json::to_value(&req).unwrap();
 
         assert_eq!(body["grantType"], "refresh_token");

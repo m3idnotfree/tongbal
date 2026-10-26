@@ -33,7 +33,7 @@
 //!     callback: AuthCallback,
 //! ) -> Result<(), Error> {
 //!     let token = oauth
-//!         .exchange_code(callback.code, callback.state)
+//!         .exchange_code(&callback.code, &callback.state)
 //!         .await?;
 //!
 //!     Ok(())
@@ -47,7 +47,7 @@
 //! ```rust
 //! # use tongbal_oauth::{Client, Error, RefreshToken};
 //! # async fn run(oauth: Client, refresh_token: RefreshToken) -> Result<(), Error> {
-//! let new_token = oauth.refresh_token(refresh_token).await?;
+//! let new_token = oauth.refresh_token(&refresh_token).await?;
 //! # Ok(())
 //! # }
 //! ```
@@ -59,8 +59,8 @@
 //! ```rust
 //! # use tongbal_oauth::{AccessToken, Client, Error, RefreshToken};
 //! # async fn run(oauth: Client, access_token: AccessToken, refresh_token: RefreshToken) -> Result<(), Error> {
-//! oauth.revoke_token(access_token).await?;
-//! oauth.revoke_token(refresh_token).await?;
+//! oauth.revoke_token(&access_token).await?;
+//! oauth.revoke_token(&refresh_token).await?;
 //! # Ok(())
 //! # }
 //! ```
